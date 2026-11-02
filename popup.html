@@ -32,8 +32,7 @@
   .link-view:hover .change, .change:focus-visible { visibility: visible; }
   .backup { display: flex; gap: 12px; margin-top: 10px; }
   button { font: inherit; color: inherit; background: transparent; border: 1px solid var(--line); border-radius: 5px; cursor: pointer; }
-  .backup button { padding: 0; border: 0; color: var(--weak); text-decoration: underline; text-underline-offset: 2px; }
-  .backup button:hover, .backup button:focus-visible { color: var(--fg); }
+  .backup button { padding: 0; border: 0; color: color-mix(in srgb, var(--weak) 70%, var(--bg)); font-weight: 400; text-decoration: underline; text-underline-offset: 2px; }
   /* Drawn in SVG: browsers round CSS borders and boxes to whole device pixels, so 1.3px needs a stroke. */
   button.add { position: relative; flex: none; width: 34px; height: 34px; padding: 0; border: 0; color: var(--accent); transition: background-color 0.15s ease-out, box-shadow 0.15s ease-out, color 0.15s ease-out; }
   button.add svg { display: block; fill: none; stroke: currentColor; stroke-width: 1.3; }
