@@ -32,7 +32,7 @@
   .exact input { position: absolute; opacity: 0; pointer-events: none; }
   .exact span { width: 26px; line-height: 22px; border-radius: 5px; color: color-mix(in srgb, var(--weak) 55%, var(--bg)); font-size: 12px; text-align: center; transition: color 0.15s ease-out; }
   .exact:hover span { color: var(--fg); }
-  .exact input:checked + span { color: var(--accent); font-weight: 600; }
+  .exact input:checked + span { color: var(--accent); }
   .exact input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
   @media (prefers-reduced-motion: reduce) { .exact span { transition: none; } }
   .row { cursor: grab; }
