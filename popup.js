@@ -34,9 +34,11 @@ const onlyOn = document.getElementById('only-on');
 const onlyIn = document.getElementById('only-in');
 const extras = document.getElementById('extras');
 const every = document.getElementById('every');
+const exactDefault = document.getElementById('exact-default');
+const newRowExact = () => extras.checked && exactDefault.checked;
 
 function readSettings() {
-  return { off: !on.checked, skipOn: skipOn.checked, skip: cleanSubs(skip.value), onlyOn: onlyOn.checked, only: cleanSubs(onlyIn.value), extras: extras.checked, every: every.checked };
+  return { off: !on.checked, skipOn: skipOn.checked, skip: cleanSubs(skip.value), onlyOn: onlyOn.checked, only: cleanSubs(onlyIn.value), extras: extras.checked, every: every.checked, exactDefault: exactDefault.checked };
 }
 
 function showSettings(settings) {
@@ -47,6 +49,7 @@ function showSettings(settings) {
   onlyIn.value = (settings.only ?? []).join(', ');
   extras.checked = Boolean(settings.extras);
   every.checked = Boolean(settings.every);
+  exactDefault.checked = Boolean(settings.exactDefault);
   showMode();
 }
 
@@ -62,7 +65,9 @@ function showMode() {
   skip.parentElement.title = onlyOn.checked ? 'Disable Only in subreddits to continue' : '';
 }
 
-for (const box of [on, onlyOn, skipOn, extras, every]) box.addEventListener('change', () => { showMode(); save(); });
+for (const box of [on, onlyOn, skipOn, extras, every, exactDefault]) box.addEventListener('change', () => { showMode(); save(); });
+// The empty row waiting to be filled in counts as new.
+for (const box of [extras, exactDefault]) box.addEventListener('change', () => { const row = emptyRow(); if (row) row.querySelector('.exact input').checked = newRowExact(); });
 for (const list of [skip, onlyIn]) {
   list.addEventListener('input', saveSoon);
   list.addEventListener('blur', () => { list.value = cleanSubs(list.value).join(', '); });
@@ -184,7 +189,7 @@ function addNames(row, names) {
   input.hidden = Boolean(box.querySelector('.chip'));
 }
 
-function addRow(link = { names: [], url: '' }) {
+function addRow(link = { names: [], url: '', exact: newRowExact() }) {
   const row = document.createElement('div');
   row.className = 'row';
   row.draggable = true;

@@ -32,6 +32,7 @@ Titles are never changed. Neither are search boxes or any other field, including
 - **Skip subreddits**: tick it and nothing is linked in the subreddits you list. It's greyed out and not used while **Only in subreddits** is ticked. List them as `pics` or `r/pics`, and your own page as `u/username`.
 - **Extra features**: off by default, and what they set is kept but not used while off.
   - **Link every mention**: links every mention instead of only the first.
+  - **Case sensitive by default (new rows)**: new rows start with **Aa** on. Existing rows stay as they are.
   - **Only in subreddits**: limits a row to those subreddits. It's skipped everywhere else.
 
 Drag a row to reorder the list. The subreddit comes from the page's address when you submit.
