@@ -18,7 +18,7 @@ Titles are never changed. Neither are search boxes or any other field, including
 
 - Matching ignores capitals and keeps what you typed: `mute list` stays `mute list`, as a link.
 - Only the first mention of each link in a post is linked, so posts don't look spammy.
-- A link can have several names, like `Mute List` and `RML`: press Enter after each. Whichever comes first in the post gets linked, and the others are left alone. Names can contain commas.
+- A link can have several names, like `Mute List` and `RML`: add each with the same link and they group together. Whichever comes first in the post gets linked, and the others are left alone. Names can contain commas.
 - Each name goes to one link, and the menu won't let you use a name twice. For a second link, like a website as well as the store page, use a more specific name: `Mute List` for the store and `Mute List website` for the site.
 - Whole names only: `Mute List` won't match inside `Mute Listing`, `mute-list` or a web address.
 - Longer names win: `Mute List Pro` beats `Mute List`.

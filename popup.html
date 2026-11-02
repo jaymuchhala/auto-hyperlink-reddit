@@ -13,8 +13,8 @@
   .row { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 6px; margin-bottom: 6px; }
   input { min-width: 0; padding: 5px 7px; border: 1px solid var(--line); border-radius: 5px; background: transparent; color: inherit; font: inherit; }
   input[aria-invalid="true"] { border-color: #d33; }
-  .names { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; padding: 3px 4px; border: 1px solid var(--line); border-radius: 5px; cursor: text; }
-  .names input { flex: 1; width: 0; min-width: 70px; padding: 1px 3px; border: 0; outline: 0; }
+  .names { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; min-height: 28px; }
+  .names input { flex: 1; width: 0; }
   /* A chip removes itself on click. On hover it grows, pushing what's after it along, while its × stretches out. */
   .chip { display: inline-flex; align-items: center; max-width: 100%; padding: 0 8px; border-radius: 999px; transition: margin-right 0.15s ease-out; }
   .chip.tight:hover, .chip.tight:focus-visible { margin-right: -6px; }
@@ -54,7 +54,7 @@
   <ul class="note">
     <li>Runs when you post or comment (including edits).</li>
     <li>First mention linked, not any others so it isn't spammy. If you already link it yourself, the extension doesn't add any.</li>
-    <li>Press Enter to add other names for the same link; only one of them gets linked.</li>
+    <li>Names with the same link group together; only one of them gets linked.</li>
     <li class="backup"><button id="backup" type="button">Back up</button> and <button id="restore" type="button">restore</button><input id="file" type="file" accept=".json,application/json" hidden></li>
   </ul>
   <script src="popup.js"></script>

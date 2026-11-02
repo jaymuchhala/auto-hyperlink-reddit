@@ -72,7 +72,7 @@ function rowNames(row) {
   return [...row.querySelectorAll('.chip')].map((c) => c.dataset.name).concat(typed ? [typed] : []);
 }
 
-// Adds names to a row as chips, leaving out any it already has.
+// Adds names to a row as chips, leaving out any it already has. The name box goes once there's a name.
 function addNames(row, names) {
   const box = row.querySelector('.names');
   const input = box.querySelector('input');
@@ -87,11 +87,9 @@ function addNames(row, names) {
     // A chip removes itself on click. Removing a row's last name removes the row.
     chip.addEventListener('click', () => {
       chip.remove();
-      if (!box.querySelector('.chip') && !input.value.trim()) {
+      if (!box.querySelector('.chip')) {
         row.remove();
         if (!rows.children.length) addRow();
-      } else {
-        input.placeholder = box.querySelector('.chip') ? 'Other name' : 'Name';
       }
       save();
     });
@@ -102,18 +100,18 @@ function addNames(row, names) {
     chip.addEventListener('focus', checkRoom);
     input.before(chip);
   }
-  input.placeholder = box.querySelector('.chip') ? 'Other name' : 'Name';
+  input.hidden = Boolean(box.querySelector('.chip'));
 }
 
 function addRow(link = { names: [], url: '' }) {
   const row = document.createElement('div');
   row.className = 'row';
   let settle;
+  let merged = false;
   const names = Object.assign(document.createElement('div'), { className: 'names' });
   const nameInput = Object.assign(document.createElement('input'), { placeholder: 'Name' });
   nameInput.setAttribute('aria-label', 'Add a name');
   names.append(nameInput);
-  names.addEventListener('click', (e) => { if (e.target === names) nameInput.focus(); });
   const commit = () => {
     if (!nameInput.value.trim()) return;
     const { free, taken } = checkNames([cleanName(nameInput.value)], row);
@@ -128,7 +126,11 @@ function addRow(link = { names: [], url: '' }) {
   };
   // Enter or leaving the box turns what's typed into a chip. Names can hold commas.
   nameInput.addEventListener('input', saveSoon);
-  nameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') commit(); });
+  nameInput.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    commit();
+    if (nameInput.hidden && !urlInput.hidden) urlInput.focus();
+  });
   nameInput.addEventListener('blur', commit);
   const urlInput = Object.assign(document.createElement('input'), { placeholder: 'https://chromewebstore.google.com/…', value: link.url });
   urlInput.setAttribute('aria-label', 'Link');
@@ -145,8 +147,18 @@ function addRow(link = { names: [], url: '' }) {
   });
   view.append(anchor, change);
   settle = () => {
+    if (merged) return; // removing the row blurs its box, which lands back here
     const url = cleanUrl(urlInput.value);
     const done = Boolean(url) && rowNames(row).length > 0;
+    // Names with the same link are one group, in the higher row.
+    const same = done && [...rows.children].find((r) => r !== row && rowNames(r).length && cleanUrl(r.querySelectorAll('input')[1].value) === url);
+    if (same) {
+      merged = true;
+      addNames(same, rowNames(row));
+      row.remove();
+      saveSoon();
+      return;
+    }
     view.hidden = !done;
     urlInput.hidden = done;
     if (!done) return;
