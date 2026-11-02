@@ -30,7 +30,6 @@
   .link-view a { overflow: hidden; color: var(--accent); text-overflow: ellipsis; white-space: nowrap; }
   .change { flex: none; width: 18px; height: 18px; padding: 0; border: 0; color: var(--danger); line-height: 1; visibility: hidden; }
   .link-view:hover .change, .change:focus-visible { visibility: visible; }
-  .backup { display: flex; gap: 12px; margin: 10px 0 0 6px; }
   button { font: inherit; color: inherit; background: transparent; border: 1px solid var(--line); border-radius: 5px; cursor: pointer; }
   .backup button { padding: 0; border: 0; color: color-mix(in srgb, var(--weak) 70%, var(--bg)); font-weight: 400; text-decoration: underline; text-underline-offset: 2px; }
   /* Drawn in SVG: browsers round CSS borders and boxes to whole device pixels, so 1.3px needs a stroke. */
@@ -42,7 +41,6 @@
   @media (prefers-reduced-motion: reduce) { button.add, button.add rect { transition: none; } }
   #status { margin: 8px 0 0; min-height: 18px; }
   .note { margin: 8px 0 0; padding: 10px 0 0 16px; border-top: 1px solid var(--line); color: var(--weak); list-style: none; }
-  /* Hyphens at a fixed spot, so Back up can line up with them. */
   .note li::before { content: "-"; position: absolute; margin-left: -10px; }
 </style>
 </head>
@@ -57,12 +55,8 @@
     <li>Runs when you post or comment (including edits).</li>
     <li>First mention linked, not any others so it isn't spammy. If you already link it yourself, the extension doesn't add any.</li>
     <li>Press Enter to add other names for the same link; only one of them gets linked.</li>
+    <li class="backup"><button id="backup" type="button">Backup</button>, <button id="restore" type="button">Restore</button><input id="file" type="file" accept=".json,application/json" hidden></li>
   </ul>
-  <div class="backup">
-    <button id="backup" type="button">Back up</button>
-    <button id="restore" type="button">Restore</button>
-    <input id="file" type="file" accept=".json,application/json" hidden>
-  </div>
   <script src="popup.js"></script>
 </body>
 </html>
