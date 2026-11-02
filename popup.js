@@ -74,6 +74,8 @@ const cleanName = (value) => value.trim().replace(/\s+/g, ' ');
 const namesOf = (link) => (Array.isArray(link.names) ? link.names : String(link.name ?? '').split(',')).map((n) => cleanName(String(n))).filter(Boolean);
 
 // Waits for a pause in typing: storage.sync refuses more than 120 writes a minute.
+// Chrome reports stored objects with their keys sorted, so comparing needs one order.
+const comparable = (value) => JSON.stringify(value, (_, v) => (v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => (a < b ? -1 : 1))) : v));
 let saveTimer = null;
 let keepStatus = false; // the next save leaves the status message up
 let lastSaved = null; // this window's own last writes, to tell them from another window's
@@ -107,9 +109,9 @@ async function save() {
   }
   const settings = readSettings();
   try {
-    lastSaved = JSON.stringify(links);
-    lastDrafts = JSON.stringify(drafts);
-    lastSettings = JSON.stringify(settings);
+    lastSaved = comparable(links);
+    lastDrafts = comparable(drafts);
+    lastSettings = comparable(settings);
     // Both start now: on pagehide, nothing after the first await would run.
     await Promise.all([chrome.storage.sync.set({ links, settings }), chrome.storage.local.set({ drafts })]);
     if (!keepStatus) status.textContent = '';
@@ -202,8 +204,12 @@ function addNames(row, names, from) {
     every.classList.add('extra');
     const subs = Object.assign(document.createElement('button'), { type: 'button', className: 'flag extra subs', textContent: 'r/' });
     subs.setAttribute('aria-label', `${name}: only in subreddits`);
+    // Keeps the focus in an open box, so its blur doesn't close it before the click below.
+    subs.addEventListener('mousedown', (e) => e.preventDefault());
     subs.addEventListener('click', () => {
       const edit = row.querySelector('.word-only');
+      if (!edit.hidden && edit.chip === chip) return edit.blur();
+      edit.chip?.classList.remove('editing');
       edit.chip = chip;
       edit.value = chip.dataset.only ?? '';
       edit.placeholder = `Only “${name}” in subreddits (blank: all)`;
@@ -440,7 +446,7 @@ function render(links, drafts) {
 async function load() {
   const [{ links = [], settings = {} }, { drafts = [] }] = await Promise.all([chrome.storage.sync.get(['links', 'settings']), chrome.storage.local.get('drafts')]);
   showSettings(settings);
-  lastSettings = JSON.stringify(settings);
+  lastSettings = comparable(settings);
   // Link every mention was once one switch for all words. The next save stores it word by word.
   const perWord = (link) => (settings.every ? { ...link, all: true } : link);
   render(links.map(perWord), drafts.map(perWord));
@@ -452,7 +458,7 @@ load().then(() => [...rows.children].find(unfinished)?.querySelector('input:not(
 
 // Saving writes the whole list, so a window left open has to keep up or it would undo the other's changes.
 chrome.storage.onChanged.addListener((changes, area) => {
-  const differs = (change, mine, empty) => change && JSON.stringify(change.newValue ?? empty) !== mine;
+  const differs = (change, mine, empty) => change && comparable(change.newValue ?? empty) !== mine;
   const other = area === 'sync' ? differs(changes.links, lastSaved, []) || differs(changes.settings, lastSettings, {}) : area === 'local' && differs(changes.drafts, lastDrafts, []);
   if (!other) return;
   clearTimeout(saveTimer);

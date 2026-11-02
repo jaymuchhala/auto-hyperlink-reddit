@@ -3,19 +3,30 @@
 <meta charset="utf-8"><title>menu</title>
 <script>
 const stored = { sync: {}, local: {} };
+const listeners = [];
+// Like Chrome: what's stored and reported back has its keys sorted, and only changed keys are reported.
+const sorted = (value) => JSON.parse(JSON.stringify(value, (_, v) => (v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => (a < b ? -1 : 1))) : v)));
 const area = (name) => ({
   get: async (keys) => Object.fromEntries([keys].flat().filter((k) => k in stored[name]).map((k) => [k, stored[name][k]])),
-  set: async (items) => { Object.assign(stored[name], items); },
+  set: async (items) => {
+    const changes = {};
+    for (const [k, v] of Object.entries(items)) {
+      const value = sorted(v);
+      if (JSON.stringify(stored[name][k]) !== JSON.stringify(value)) changes[k] = { oldValue: stored[name][k], newValue: value };
+      stored[name][k] = value;
+    }
+    if (Object.keys(changes).length) setTimeout(() => listeners.forEach((f) => f(changes, name)));
+  },
 });
-window.chrome = { runtime: { getManifest: () => ({ update_url: 'test' }), getURL: (p) => `/${p}` }, tabs: { getCurrent: async () => null, create: async () => {} }, storage: { sync: area('sync'), local: area('local'), onChanged: { addListener() {} } } };
+window.chrome = { runtime: { getManifest: () => ({ update_url: 'test' }), getURL: (p) => `/${p}` }, tabs: { getCurrent: async () => null, create: async () => {} }, storage: { sync: area('sync'), local: area('local'), onChanged: { addListener: (f) => listeners.push(f) } } };
 stored.sync.links = [{ names: ['RES', 'Reddit Enhancement Suite', 'Reddit Enhancement Suite Plus', 'A Really Long Phrase That Has To Wrap Onto Two Lines', 'AB', 'CD'], url: 'https://chrome.google.com/', exact: true }, { names: ['Dark Reader', 'DR', 'Long Phrase Here'], url: 'https://chromewebstore.google.com/', exact: ['DR'], all: ['Dark Reader', 'DR'], subs: { DR: ['pics', 'u/me'] }, only: ['chrome'] }];
 stored.sync.settings = { skip: ['pics'], extras: true };
-fetch('/popup.html').then((r) => r.text()).then((html) => {
+fetch('/popup.html', { cache: 'no-store' }).then((r) => r.text()).then((html) => {
   const doc = new DOMParser().parseFromString(html, 'text/html');
   document.head.append(...doc.head.querySelectorAll('style'));
   document.body.replaceChildren(...doc.body.querySelectorAll(':scope > :not(script)'));
   const script = document.createElement('script');
-  script.src = '/popup.js';
+  script.src = `/popup.js?${Date.now()}`; // never a cached copy
   document.body.append(script);
 });
 </script>
