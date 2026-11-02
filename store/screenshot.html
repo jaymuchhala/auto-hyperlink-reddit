@@ -16,8 +16,8 @@
   .row { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 6px; margin-bottom: 6px; }
   .names { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-height: 28px; }
   .chip { padding: 0 8px; border: 1px solid var(--line); border-radius: 999px; }
-  .link { display: flex; align-items: center; min-height: 28px; }
-  .link a { color: var(--accent); }
+  .link { display: flex; align-items: center; min-width: 0; min-height: 28px; }
+  .link a { overflow: hidden; color: var(--accent); text-overflow: ellipsis; white-space: nowrap; }
   .note { margin: 26px 0 0; padding: 10px 30px 0 16px; color: var(--weak); list-style: none; }
   .note li::before { content: "-"; position: absolute; margin-left: -10px; }
   .note u { color: color-mix(in srgb, var(--weak) 70%, var(--bg)); text-underline-offset: 2px; }
@@ -27,9 +27,9 @@
 <div class="cols">
   <div class="menu">
     <header><b>Auto Hyperlink for Reddit</b><svg width="34" height="34" viewBox="0 0 34 34"><rect x="0.65" y="0.65" width="32.7" height="32.7" rx="4.35"/><path d="M17 10v14M10 17h14"/></svg></header>
-    <div class="row"><div class="names"><span class="chip">Tab Saver</span></div><div class="link"><a href="#">tabsaver.example.com</a></div></div>
-    <div class="row"><div class="names"><span class="chip">Focus Timer</span><span class="chip">FT</span></div><div class="link"><a href="#">focustimer.example.com</a></div></div>
-    <div class="row"><div class="names"><span class="chip">Dark Reader Lite</span></div><div class="link"><a href="#">darklite.example.com</a></div></div>
+    <div class="row"><div class="names"><span class="chip">RES</span><span class="chip">Reddit Enhancement Suite</span></div><div class="link"><a href="#">chrome.google.com</a></div></div>
+    <div class="row"><div class="names"><span class="chip">Dark Reader</span></div><div class="link"><a href="#">chromewebstore.google.com</a></div></div>
+    <div class="row"><div class="names"><span class="chip">substack</span></div><div class="link"><a href="#">example.substack.com</a></div></div>
     <ul class="note">
       <li>Runs when you post, comment or edit.</li>
       <li>First mention linked only.</li>
@@ -40,8 +40,8 @@
   </div>
   <div class="card">
     <div class="tag">What you type</div>
-    <div class="box">I keep everything open with Tab Saver, and Focus Timer helps me stay on task.<br><span class="btn">Comment</span></div>
+    <div class="box">I use RES to keep Reddit tidy, and Dark Reader is easy on my eyes at night.<br><span class="btn">Comment</span></div>
     <div class="tag">What gets posted</div>
-    <div class="box" style="margin:0">I keep everything open with <a href="#">Tab Saver</a>, and <a href="#">Focus Timer</a> helps me stay on task.</div>
+    <div class="box" style="margin:0">I use <a href="#">RES</a> to keep Reddit tidy, and <a href="#">Dark Reader</a> is easy on my eyes at night.</div>
   </div>
 </div>
