@@ -52,10 +52,10 @@ async function save() {
     const names = rowNames(row);
     url.setAttribute('aria-invalid', String(Boolean(url.value.trim()) && !address));
     // A half-typed change keeps the last good link: the menu can close at any moment.
-    if (address) row.dataset.saved = address;
+    if (address && names.length) row.dataset.saved = address;
     if (names.length && row.dataset.saved) links.push({ names, url: row.dataset.saved });
-    // Names waiting for a link stay on this computer, and out of what link.js reads.
-    else if (names.length) drafts.push({ names, url: url.value.trim() });
+    // A name waiting for a link, or a link for a name, stays on this computer and out of what link.js reads.
+    else if (names.length || url.value.trim()) drafts.push({ names, url: url.value.trim() });
   }
   try {
     lastSaved = JSON.stringify(links);
@@ -138,7 +138,7 @@ function addNames(row, names) {
 function addRow(link = { names: [], url: '' }) {
   const row = document.createElement('div');
   row.className = 'row';
-  if (cleanUrl(link.url)) row.dataset.saved = cleanUrl(link.url);
+  if (cleanUrl(link.url) && namesOf(link).length) row.dataset.saved = cleanUrl(link.url);
   let settle;
   let merged = false;
   const names = Object.assign(document.createElement('div'), { className: 'names' });
@@ -278,7 +278,7 @@ function render(links, drafts) {
   // A draft's name may have been given a link in another window since.
   for (const draft of drafts) {
     const { free } = checkNames(namesOf(draft), null);
-    if (free.length) addRow({ names: free, url: draft.url });
+    if (free.length || draft.url) addRow({ names: free, url: draft.url });
   }
   if (!rows.children.length) addRow();
 }
@@ -288,8 +288,9 @@ async function load() {
   render(links, drafts);
 }
 
-// Opens ready to paste the link for the first name still waiting for one.
-load().then(() => [...rows.children].find((row) => !row.dataset.saved && rowNames(row).length)?.querySelectorAll('input')[1].focus());
+// Opens ready to finish the first row that's missing its name or its link.
+const unfinished = (row) => (rowNames(row).length ? !row.dataset.saved : Boolean(row.querySelectorAll('input')[1].value.trim()));
+load().then(() => [...rows.children].find(unfinished)?.querySelector('input:not([hidden])').focus());
 
 // Saving writes the whole list, so a window left open has to keep up or it would undo the other's changes.
 chrome.storage.onChanged.addListener((changes, area) => {
