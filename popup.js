@@ -28,18 +28,22 @@ function cleanUrl(value) {
 const cleanSubs = (value) => [...new Set(String(value).split(/[\s,]+/).map((s) => s.toLowerCase().replace(/^\/?r\//, '').replace(/^\/?(?:u|user)\//, 'u/')).filter(Boolean))];
 
 const on = document.getElementById('on');
+const skipOn = document.getElementById('skip-on');
 const skip = document.getElementById('skip');
+const onlyOn = document.getElementById('only-on');
 const onlyIn = document.getElementById('only-in');
 const extras = document.getElementById('extras');
 const every = document.getElementById('every');
 
 function readSettings() {
-  return { off: !on.checked, skip: cleanSubs(skip.value), only: cleanSubs(onlyIn.value), extras: extras.checked, every: every.checked };
+  return { off: !on.checked, skipOn: skipOn.checked, skip: cleanSubs(skip.value), onlyOn: onlyOn.checked, only: cleanSubs(onlyIn.value), extras: extras.checked, every: every.checked };
 }
 
 function showSettings(settings) {
   on.checked = !settings.off;
+  skipOn.checked = Boolean(settings.skipOn);
   skip.value = (settings.skip ?? []).join(', ');
+  onlyOn.checked = Boolean(settings.onlyOn);
   onlyIn.value = (settings.only ?? []).join(', ');
   extras.checked = Boolean(settings.extras);
   every.checked = Boolean(settings.every);
@@ -50,12 +54,16 @@ function showMode() {
   document.body.classList.toggle('off', !on.checked);
   document.body.classList.toggle('extras', extras.checked);
   document.body.classList.toggle('every', extras.checked && every.checked);
-  document.body.classList.toggle('only-set', cleanSubs(onlyIn.value).length > 0);
+  document.body.classList.toggle('only-on', onlyOn.checked);
+  // Only in subreddits overrides Skip subreddits, so Skip greys out while it's ticked.
+  onlyIn.disabled = !onlyOn.checked;
+  skipOn.disabled = onlyOn.checked;
+  skip.disabled = onlyOn.checked || !skipOn.checked;
 }
 
-for (const box of [on, extras, every]) box.addEventListener('change', () => { showMode(); save(); });
+for (const box of [on, onlyOn, skipOn, extras, every]) box.addEventListener('change', () => { showMode(); save(); });
 for (const list of [skip, onlyIn]) {
-  list.addEventListener('input', () => { showMode(); saveSoon(); });
+  list.addEventListener('input', saveSoon);
   list.addEventListener('blur', () => { list.value = cleanSubs(list.value).join(', '); });
 }
 

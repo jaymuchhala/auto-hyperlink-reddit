@@ -28,8 +28,8 @@ Titles are never changed. Neither are search boxes or any other field, including
 ## Settings
 
 - **On**: turns linking on or off.
-- **Only in subreddits**: links are added only there. Blank means everywhere.
-- **Skip subreddits**: nothing is linked there. It's hidden and not used while **Only in subreddits** has entries. List them as `pics` or `r/pics`, and your own page as `u/username`.
+- **Only in subreddits**: tick it and links are added only in the subreddits you list. A blank list means everywhere.
+- **Skip subreddits**: tick it and nothing is linked in the subreddits you list. It's greyed out and not used while **Only in subreddits** is ticked. List them as `pics` or `r/pics`, and your own page as `u/username`.
 - **Extra features**: off by default, and what they set is kept but not used while off.
   - **Link every mention**: links every mention instead of only the first.
   - **Only in subreddits**: limits a row to those subreddits. It's skipped everywhere else.

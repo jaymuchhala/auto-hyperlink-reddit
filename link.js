@@ -20,8 +20,8 @@
     const [, kind, name] = location.pathname.toLowerCase().match(/^\/(r|u|user)\/([^/]+)/) ?? [];
     return kind && (kind === 'r' ? name : `u/${name}`);
   };
-  // With an Only in subreddits list, the skip list isn't used.
-  const listsAllow = () => (settings.only?.length ? settings.only.includes(subreddit()) : !settings.skip?.includes(subreddit()));
+  // One list applies at a time. A blank Only in subreddits list means everywhere.
+  const listsAllow = () => (settings.onlyOn ? !settings.only?.length || settings.only.includes(subreddit()) : !settings.skipOn || !settings.skip?.includes(subreddit()));
   const activeLinks = () => links.filter((l) => !l.only?.length || l.only.includes(subreddit()));
 
   function rules() {
