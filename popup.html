@@ -11,8 +11,14 @@
   h1 { font-size: 15px; margin: 0; }
   p { margin: 0 0 12px; color: var(--weak); }
   /* 9.5 rows, so the cut-off row shows there's more. The padding keeps focus outlines from being clipped and the scrollbar off the boxes. */
-  #rows { max-height: 323px; margin: -3px -9px -3px -3px; padding: 3px 9px 3px 3px; overflow-x: hidden; overflow-y: auto; scrollbar-width: thin; }
+  #rows { max-height: 323px; margin: -3px -9px -3px -3px; padding: 3px 5px 3px 3px; overflow-x: hidden; overflow-y: auto; scrollbar-gutter: stable; }
+  #rows::-webkit-scrollbar { width: 4px; background: transparent; }
+  #rows::-webkit-scrollbar-track { margin: 6px 0; background: transparent; }
+  #rows::-webkit-scrollbar-thumb { border-radius: 2px; background: var(--line); }
+  /* The row being added stays below the list. The scrollbar ends above it. */
+  #rows:has(> .row:last-child > .link-view[hidden])::-webkit-scrollbar-track { margin-bottom: 44px; }
   .row { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 6px; margin-bottom: 6px; }
+  .row:last-child:has(> .link-view[hidden]) { position: sticky; z-index: 1; bottom: 6px; background: var(--bg); box-shadow: 0 0 0 6px var(--bg); }
   input { min-width: 0; padding: 5px 7px; border: 1px solid var(--line); border-radius: 5px; background: transparent; color: inherit; font: inherit; }
   input[aria-invalid="true"] { border-color: #d33; }
   .names { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; min-height: 28px; }
