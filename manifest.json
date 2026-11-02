@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Auto Hyperlink for Reddit (Beta)",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Turns names you choose into links in your Reddit posts and comments, at the moment you press Post or Comment.",
   "homepage_url": "https://github.com/jaymuchhala/auto-hyperlink-reddit",
   "permissions": ["storage"],
