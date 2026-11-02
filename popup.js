@@ -24,7 +24,7 @@ function cleanUrl(value) {
   } catch { return null; }
 }
 
-// Subreddits and profiles from a typed list: commas or spaces. A subreddit is kept without r/, a profile as u/name.
+// Subreddits from a typed list: commas or spaces. Kept without r/, and a user's page as u/name.
 const cleanSubs = (value) => [...new Set(String(value).split(/[\s,]+/).map((s) => s.toLowerCase().replace(/^\/?r\//, '').replace(/^\/?(?:u|user)\//, 'u/')).filter(Boolean))];
 
 const on = document.getElementById('on');
@@ -173,6 +173,7 @@ function addNames(row, names) {
 function addRow(link = { names: [], url: '' }) {
   const row = document.createElement('div');
   row.className = 'row';
+  row.draggable = true;
   if (cleanUrl(link.url) && namesOf(link).length) row.dataset.saved = cleanUrl(link.url);
   let settle;
   let merged = false;
@@ -206,7 +207,7 @@ function addRow(link = { names: [], url: '' }) {
   urlInput.addEventListener('input', saveSoon);
   // A row with a name and a valid link shows the link as plain text. Its × goes back to the box.
   const view = Object.assign(document.createElement('div'), { className: 'link-view' });
-  const anchor = Object.assign(document.createElement('a'), { target: '_blank', rel: 'noopener' });
+  const anchor = Object.assign(document.createElement('a'), { target: '_blank', rel: 'noopener', draggable: false });
   const change = Object.assign(document.createElement('button'), { type: 'button', className: 'change', textContent: '×', title: 'Change link' });
   change.setAttribute('aria-label', 'Change link');
   change.addEventListener('click', () => {
@@ -239,9 +240,9 @@ function addRow(link = { names: [], url: '' }) {
   const exactBox = Object.assign(document.createElement('input'), { type: 'checkbox', checked: Boolean(link.exact) });
   exactBox.setAttribute('aria-label', 'Match capitals exactly');
   exactBox.addEventListener('change', () => save());
-  exact.append(exactBox, 'Aa');
-  const only = Object.assign(document.createElement('input'), { className: 'only extra', placeholder: 'Only in subreddits or u/profiles (blank: all)', value: (link.only ?? []).join(', ') });
-  only.setAttribute('aria-label', 'Only in these subreddits or profiles');
+  exact.append(exactBox);
+  const only = Object.assign(document.createElement('input'), { className: 'only extra', placeholder: 'Only in subreddits (blank: all)', value: (link.only ?? []).join(', ') });
+  only.setAttribute('aria-label', 'Only in these subreddits');
   only.addEventListener('input', saveSoon);
   only.addEventListener('blur', () => { only.value = cleanSubs(only.value).join(', '); });
   row.append(names, urlInput, view, exact, only);
@@ -250,6 +251,32 @@ function addRow(link = { names: [], url: '' }) {
   settle();
   return row;
 }
+
+// Drag a row to reorder. Dragging inside a text box still selects its text.
+let dragged = null;
+rows.addEventListener('mousedown', (e) => {
+  const row = e.target.closest('.row');
+  if (row) row.draggable = !e.target.matches('input:not([type="checkbox"])');
+});
+rows.addEventListener('dragstart', (e) => {
+  dragged = e.target.closest('.row');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', '');
+  dragged.classList.add('dragging');
+});
+rows.addEventListener('dragover', (e) => {
+  if (!dragged) return;
+  e.preventDefault();
+  const over = e.target.closest('.row');
+  if (!over || over === dragged) return;
+  const box = over.getBoundingClientRect();
+  over[e.clientY < box.top + box.height / 2 ? 'before' : 'after'](dragged);
+});
+rows.addEventListener('dragend', () => {
+  dragged.classList.remove('dragging');
+  dragged = null;
+  save();
+});
 
 // With an empty row already there, + goes to it instead of adding another.
 const emptyRow = () => [...rows.children].find((row) => !rowNames(row).length && !row.querySelectorAll('input')[1].value.trim());

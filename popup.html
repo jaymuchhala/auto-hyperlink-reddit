@@ -26,7 +26,9 @@
   .row:last-child:has(> .link-view[hidden]) { position: sticky; z-index: 1; bottom: 6px; background: var(--bg); box-shadow: 0 0 0 6px var(--bg); }
   input { min-width: 0; padding: 5px 7px; border: 1px solid var(--line); border-radius: 5px; background: transparent; color: inherit; font: inherit; }
   input[aria-invalid="true"] { border-color: #d33; }
-  .exact { min-height: 28px; gap: 3px; color: var(--weak); }
+  .exact { min-height: 28px; }
+  .row { cursor: grab; }
+  .row.dragging { opacity: 0.4; }
   .only { grid-column: 1 / -1; }
   #settings { display: grid; gap: 8px; margin-top: 8px; }
   #settings label:has(#skip) { display: grid; gap: 4px; }
@@ -76,14 +78,15 @@
   <div id="rows"></div>
   <p id="status" role="status"></p>
   <div id="settings">
-    <label>Skip subreddits and profiles <input id="skip" placeholder="pics, askreddit, u/username"></label>
+    <label>Skip subreddits <input id="skip" placeholder="pics, askreddit, u/username"></label>
     <label class="check"><input type="checkbox" id="extras"> Extra features</label>
     <label class="check extra"><input type="checkbox" id="every"> Link every mention</label>
   </div>
   <ul class="note">
     <li>Runs when you post, comment or edit.</li>
     <li class="first-only">First mention linked only.</li>
-    <li>Aa: match capitals exactly.</li>
+    <li>Tick a row's checkbox to match capitals exactly.</li>
+    <li>Drag a row to reorder.</li>
     <li class="first-only">If link is already in post or comment, it won't add to any other words/phrases from the list.</li>
     <li>New entries apply to open/loaded tabs as well.</li>
     <li class="backup"><button id="backup" type="button">Back up</button> and <button id="restore" type="button">restore</button><input id="file" type="file" accept=".json,application/json" hidden></li>

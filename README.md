@@ -16,7 +16,7 @@ Titles are never changed. Neither are search boxes or any other field, including
 
 ## What it does and doesn't link
 
-- Matching ignores capitals and keeps what you typed: `mute list` stays `mute list`, as a link. Tick **Aa** on a row to match its names' capitals exactly.
+- Matching ignores capitals and keeps what you typed: `mute list` stays `mute list`, as a link. Tick a row's checkbox to match its names' capitals exactly.
 - Only the first mention of each link in a post is linked, so posts don't look spammy.
 - A link can have several names, like `Mute List` and `RML`: add each with the same link and they group together. Whichever comes first in the post gets linked, and the others are left alone. Names can contain commas.
 - Each name goes to one link, and the menu won't let you use a name twice. For a second link, like a website as well as the store page, use a more specific name: `Mute List` for the store and `Mute List website` for the site.
@@ -28,12 +28,12 @@ Titles are never changed. Neither are search boxes or any other field, including
 ## Settings
 
 - **On**: turns linking on or off.
-- **Skip subreddits and profiles**: nothing is linked on these pages. List subreddits as `pics` or `r/pics`, and profiles as `u/username`.
+- **Skip subreddits**: nothing is linked there. List them as `pics` or `r/pics`, and your own page as `u/username`.
 - **Extra features**: off by default, and what they set is kept but not used while off.
   - **Link every mention**: links every mention instead of only the first.
-  - **Only in subreddits or u/profiles**: limits a row to those pages. It's skipped everywhere else.
+  - **Only in subreddits**: limits a row to those subreddits. It's skipped everywhere else.
 
-The subreddit or profile comes from the page's address when you submit.
+Drag a row to reorder the list. The subreddit comes from the page's address when you submit.
 
 ## Your data
 
