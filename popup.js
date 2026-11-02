@@ -254,7 +254,7 @@ function addRow(link = { names: [], url: '' }) {
   const exactBox = Object.assign(document.createElement('input'), { type: 'checkbox', checked: Boolean(link.exact) });
   exactBox.setAttribute('aria-label', 'Make the word-matching case sensitive');
   exactBox.addEventListener('change', () => save());
-  exact.append(exactBox);
+  exact.append(exactBox, Object.assign(document.createElement('span'), { textContent: 'Aa' }));
   const only = Object.assign(document.createElement('input'), { className: 'only extra', placeholder: 'Only in subreddits (blank: all)', value: (link.only ?? []).join(', ') });
   only.setAttribute('aria-label', 'Only in these subreddits');
   only.addEventListener('input', saveSoon);
