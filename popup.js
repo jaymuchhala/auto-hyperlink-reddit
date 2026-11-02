@@ -59,6 +59,7 @@ function showMode() {
   onlyIn.disabled = !onlyOn.checked;
   skipOn.disabled = onlyOn.checked;
   skip.disabled = onlyOn.checked || !skipOn.checked;
+  skip.parentElement.title = onlyOn.checked ? 'Disable Only in subreddits to continue' : '';
 }
 
 for (const box of [on, onlyOn, skipOn, extras, every]) box.addEventListener('change', () => { showMode(); save(); });
