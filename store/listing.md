@@ -15,15 +15,15 @@ Mention the same tools or Chrome extensions on Reddit a lot? Type as normal, and
 Reddit changes its pages often. If something stops linking, please open an issue on GitHub.
 
 How it works
-- Add names and their links in the extension's toolbar menu.
+- Add words or phrases and their links in the extension's toolbar menu.
 - Write your post or comment as usual.
-- When you press Post, Comment, Reply or Save, the first mention of each link's name becomes a link.
+- When you press Post, Comment, Reply or Save, the first mention of each link's word or phrase becomes a link.
 
 Details
 - Works in rich text and Markdown, in comments, replies, edits and post bodies, on new and old Reddit.
 - Never touches titles, or text that's already a link or code.
-- Matches whole names only and ignores capitals.
-- Give one link several names, and back up or restore your list.
+- Matches whole words and phrases only and ignores capitals.
+- Give one link several words or phrases, and back up or restore your list.
 
 Light and private
 - Runs only when you submit. Nothing runs while you read or type.
@@ -42,9 +42,9 @@ Not affiliated with or endorsed by Reddit.
 
 ## Privacy practices
 
-**Single purpose:** Adds the user's chosen links to names in the Reddit post or comment they are submitting.
+**Single purpose:** Adds the user's chosen links to words or phrases in the Reddit post or comment they are submitting.
 
-**storage justification:** Saves the names and links the user enters in the extension's menu.
+**storage justification:** Saves the words or phrases and links the user enters in the extension's menu.
 
 **Host permission justification:** Needed on Reddit (www, new, sh and old) to add links to the box the user is submitting. It runs only on these sites and only when a submit button is pressed.
 
