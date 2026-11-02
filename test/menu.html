@@ -8,7 +8,7 @@ const area = (name) => ({
   set: async (items) => { Object.assign(stored[name], items); },
 });
 window.chrome = { runtime: { getManifest: () => ({ update_url: 'test' }), getURL: (p) => `/${p}` }, tabs: { getCurrent: async () => null, create: async () => {} }, storage: { sync: area('sync'), local: area('local'), onChanged: { addListener() {} } } };
-stored.sync.links = [{ names: ['RES', 'Reddit Enhancement Suite'], url: 'https://chrome.google.com/', exact: true }, { names: ['Dark Reader', 'DR', 'Long Phrase Here'], url: 'https://chromewebstore.google.com/', exact: ['DR'], all: ['Dark Reader', 'DR'], subs: { DR: ['pics', 'u/me'] }, only: ['chrome'] }];
+stored.sync.links = [{ names: ['RES', 'Reddit Enhancement Suite', 'Reddit Enhancement Suite Plus', 'A Really Long Phrase That Has To Wrap Onto Two Lines', 'AB', 'CD'], url: 'https://chrome.google.com/', exact: true }, { names: ['Dark Reader', 'DR', 'Long Phrase Here'], url: 'https://chromewebstore.google.com/', exact: ['DR'], all: ['Dark Reader', 'DR'], subs: { DR: ['pics', 'u/me'] }, only: ['chrome'] }];
 stored.sync.settings = { skip: ['pics'], extras: true };
 fetch('/popup.html').then((r) => r.text()).then((html) => {
   const doc = new DOMParser().parseFromString(html, 'text/html');

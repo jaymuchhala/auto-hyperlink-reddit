@@ -32,17 +32,23 @@
   .word-only { grid-column: 1 / -1; }
   #settings { display: grid; gap: 8px; margin-top: 8px; }
   #settings .list { display: grid; gap: 4px; }
-  .names { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; min-height: 28px; }
+  .names { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; min-height: 28px; container-type: inline-size; }
   .names input { flex: 1; width: 0; }
   /* A chip's border means case sensitive and its fill means every mention. On hover it grows, pushing what's after it along, while its toggles and × stretch out. */
-  .chip { display: inline-flex; align-items: center; max-width: 100%; padding: 0 8px; border: 1px solid var(--line); border-radius: 999px; user-select: none; transition: margin-right 0.15s ease-out, border-color 0.15s ease-out, background-color 0.15s ease-out; }
+  .chip { display: inline-flex; flex: none; align-items: center; padding: 0 8px; border: 1px solid var(--line); border-radius: 999px; background-color: var(--bg); user-select: none; transition: margin-right 0.15s ease-out, border-color 0.15s ease-out, background-color 0.15s ease-out; }
   .chip.exact { border-color: var(--accent); }
   body.extras .chip.all { background-color: color-mix(in srgb, var(--accent) 16%, var(--bg)); }
   /* A dotted underline means the word has its own subreddits. */
   body.extras .chip[data-only] .word { text-decoration: underline dotted; text-underline-offset: 3px; }
   .chip.editing { outline: 2px solid var(--accent); outline-offset: 1px; }
-  /* --tools is measured on hover. */
-  .chip.tight:hover, .chip.tight:has(:focus-visible) { position: relative; z-index: 2; max-width: calc(100% + var(--tools)); margin-right: calc(-1 * var(--tools)); background-color: var(--bg); }
+  /* The limit is on the name, so the tools opening and closing can't re-wrap it. 18px is the chip's padding and border. */
+  .word { max-width: calc(100cqw - 18px); overflow-wrap: anywhere; }
+  /* .tight grows over what's next: its margin cancels the tools' width, so nothing moves. --tools is measured on hover. */
+  .chip.tight { z-index: 1; }
+  .chip:hover, .chip:has(:focus-visible) { z-index: 2; }
+  .chip.tight:hover, .chip.tight:has(:focus-visible) { margin-right: calc(-1 * var(--tools)); }
+  .chip.closed { margin-right: 0 !important; transition: none; }
+  .chip.closed .tools { width: 0 !important; margin: 0 !important; transition: none; }
   .tools { display: flex; flex: none; align-items: center; width: 0; overflow: hidden; transition: width 0.15s ease-out, margin 0.15s ease-out; }
   .chip:hover .tools, .chip:has(:focus-visible) .tools { width: var(--tools); margin: 0 -4px 0 4px; }
   /* Only the text changes, lit in the accent when on and faint when off. */

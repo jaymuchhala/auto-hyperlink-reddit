@@ -228,15 +228,16 @@ function addNames(row, names, from) {
     chip.append(word, tools);
     // only is what older data has: one list for a whole row.
     setWordSubs(chip, from?.subs?.[name] ?? from?.only ?? []);
-    // .tight: a chip at the end of a line grows over what's next instead, since
-    // wrapping would pull it out from under the pointer.
+    // Growing must never move a chip to another line, which shifts what's under the pointer.
+    // .tight: with no room left on its line, a chip grows over what's next instead.
     const checkRoom = () => {
+      chip.classList.add('closed'); // measures from its resting size, even partway through closing
       chip.style.setProperty('--tools', `${tools.scrollWidth}px`);
-      // The name's one-line width, since a chip already grown to the edge wraps it. 9 is the chip's padding and border.
-      word.style.whiteSpace = 'nowrap';
-      const needed = word.getBoundingClientRect().left + word.scrollWidth + tools.scrollWidth + 9;
-      word.style.whiteSpace = '';
-      chip.classList.toggle('tight', needed > box.getBoundingClientRect().right);
+      const { bottom } = chip.getBoundingClientRect();
+      let last = chip;
+      while (last.nextElementSibling?.matches('.chip') && last.nextElementSibling.getBoundingClientRect().top < bottom) last = last.nextElementSibling;
+      chip.classList.toggle('tight', last.getBoundingClientRect().right + tools.scrollWidth > box.getBoundingClientRect().right);
+      chip.classList.remove('closed');
     };
     chip.addEventListener('mouseenter', checkRoom);
     chip.addEventListener('focusin', checkRoom);
