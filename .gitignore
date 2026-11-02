@@ -3,3 +3,5 @@ build.txt
 dist/
 .DS_Store
 .claude/
+# Local project notes
+CLAUDE.md
