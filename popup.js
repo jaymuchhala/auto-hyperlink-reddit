@@ -200,7 +200,11 @@ function addRow(link = { names: [], url: '' }) {
   return row;
 }
 
-document.getElementById('add').addEventListener('click', () => addRow().querySelector('input').focus());
+// With an empty row already there, + goes to it instead of adding another.
+document.getElementById('add').addEventListener('click', () => {
+  const empty = [...rows.children].find((row) => !rowNames(row).length && !row.querySelectorAll('input')[1].value.trim());
+  (empty ?? addRow()).querySelector('input').focus();
+});
 
 document.getElementById('backup').addEventListener('click', async () => {
   const saved = await save();
