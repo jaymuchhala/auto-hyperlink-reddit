@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Auto Hyperlink for Reddit",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Add hyperlink to text automatically for posting or commenting on Reddit.",
   "homepage_url": "https://github.com/jaymuchhala/auto-hyperlink-reddit",
   "permissions": ["storage"],

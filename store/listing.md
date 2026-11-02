@@ -46,7 +46,7 @@ Not affiliated with or endorsed by Reddit.
 
 **storage justification:** Saves the words or phrases and links the user enters in the extension's menu.
 
-**Host permission justification:** Needed on Reddit (www, new, sh and old) to add links to the box the user is submitting. It works only on these sites and adds links only when the user submits (Post, Comment, Save, Save Edits or Cmd/Ctrl+Enter).
+**Host permission justification:** Needed on Reddit (www, new, sh and old) to add links to the box the user is submitting. It works only on these sites and adds links only when the user presses a submit button (Post, Comment, Save or Save Edits).
 
 **Remote code:** No, I am not using remote code.
 

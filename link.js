@@ -150,13 +150,6 @@
       ?? inPath(path, 'form')?.querySelector(TEXTAREA));
   }, true);
 
-  // Cmd/Ctrl+Enter sends from inside the box.
-  addEventListener('keydown', (e) => {
-    if (e.key !== 'Enter' || !(e.metaKey || e.ctrlKey)) return;
-    const path = e.composedPath();
-    linkBox(inPath(path, COMPOSER) ?? inPath(path, TEXTAREA));
-  }, true);
-
   document.addEventListener('ahl:links', (e) => { links = JSON.parse(e.detail); });
   document.dispatchEvent(new CustomEvent('ahl:ready'));
 })();

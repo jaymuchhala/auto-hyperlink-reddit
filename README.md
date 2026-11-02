@@ -31,7 +31,7 @@ Names and links save as you type, in Chrome's extension storage, and sync betwee
 
 ## Light by design
 
-There's no typing listener, page observer, timer or network request. The code runs when a submit button is clicked or Cmd/Ctrl+Enter is pressed, and only reads the box you're sending. The small background worker exists only for the development reload below and stays idle in store installs. See [PRIVACY.md](PRIVACY.md).
+There's no typing listener, page observer, timer or network request. The code runs when a submit button is clicked, and only reads the box you're sending. The small background worker exists only for the development reload below and stays idle in store installs. See [PRIVACY.md](PRIVACY.md).
 
 ## Install from source
 
