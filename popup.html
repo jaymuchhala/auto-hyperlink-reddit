@@ -30,7 +30,7 @@
   .link-view a { overflow: hidden; color: var(--accent); text-overflow: ellipsis; white-space: nowrap; }
   .change { flex: none; width: 18px; height: 18px; padding: 0; border: 0; color: var(--danger); line-height: 1; visibility: hidden; }
   .link-view:hover .change, .change:focus-visible { visibility: visible; }
-  .backup { display: flex; gap: 12px; margin-top: 10px; }
+  .backup { display: flex; gap: 12px; margin: 10px 0 0 6px; }
   button { font: inherit; color: inherit; background: transparent; border: 1px solid var(--line); border-radius: 5px; cursor: pointer; }
   .backup button { padding: 0; border: 0; color: color-mix(in srgb, var(--weak) 70%, var(--bg)); font-weight: 400; text-decoration: underline; text-underline-offset: 2px; }
   /* Drawn in SVG: browsers round CSS borders and boxes to whole device pixels, so 1.3px needs a stroke. */
@@ -41,7 +41,9 @@
   button.add:hover rect, button.add:focus-visible rect { stroke: color-mix(in srgb, var(--accent) 45%, transparent); }
   @media (prefers-reduced-motion: reduce) { button.add, button.add rect { transition: none; } }
   #status { margin: 8px 0 0; min-height: 18px; }
-  .note { margin: 8px 0 0; padding: 10px 0 0 16px; border-top: 1px solid var(--line); color: var(--weak); list-style-type: "- "; }
+  .note { margin: 8px 0 0; padding: 10px 0 0 16px; border-top: 1px solid var(--line); color: var(--weak); list-style: none; }
+  /* Hyphens at a fixed spot, so Back up can line up with them. */
+  .note li::before { content: "-"; position: absolute; margin-left: -10px; }
 </style>
 </head>
 <body>
