@@ -45,7 +45,7 @@ async function save() {
   }
   try {
     await chrome.storage.sync.set({ links });
-    status.textContent = notice || (unfinished ? 'Rows need a name and a valid address to count.' : 'Saved. It applies to open Reddit tabs too.');
+    status.textContent = notice || (unfinished ? '' : 'Saved. It applies to open Reddit tabs too.');
     notice = '';
   } catch (err) {
     status.textContent = `Couldn't save: ${err.message}`;

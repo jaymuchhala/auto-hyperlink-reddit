@@ -38,7 +38,7 @@
   button.add::before, button.add::after { content: ""; position: absolute; top: 50%; left: 50%; width: 14px; height: 2px; border-radius: 1px; background: currentColor; transform: translate(-50%, -50%); }
   button.add::after { transform: translate(-50%, -50%) rotate(90deg); }
   #status { margin: 8px 0 0; min-height: 18px; }
-  .note { margin: 8px 0 0; padding-top: 10px; border-top: 1px solid var(--line); }
+  .note { margin: 8px 0 0; padding: 10px 0 0 16px; border-top: 1px solid var(--line); color: var(--weak); }
 </style>
 </head>
 <body>
@@ -48,7 +48,12 @@
   </header>
   <div id="rows"></div>
   <p id="status" role="status"></p>
-  <p class="note">Runs when you post or comment (including edits).<br>First mention linked, not any others so it isn't spammy. If you already link it yourself, the extension doesn't add any.<br>Press Enter to add other names for the same link; only one of them gets linked.</p>
+  <ul class="note">
+    <li>Runs when you post or comment (including edits).</li>
+    <li>First mention linked, not any others so it isn't spammy.</li>
+    <li>If you already link it yourself, the extension doesn't add any.</li>
+    <li>Press Enter to add other names for the same link; only one of them gets linked.</li>
+  </ul>
   <div class="backup">
     <button id="backup" type="button">Back up</button>
     <button id="restore" type="button">Restore</button>
