@@ -3,27 +3,40 @@
   * { box-sizing: border-box; } html, body { margin: 0; width: 1280px; height: 800px; }
   body { background: #eef3f9; color: #1c1c1c; font: 22px/1.45 system-ui, sans-serif; padding: 56px 72px; }
   h1 { font-size: 44px; line-height: 1.15; margin: 0 0 8px; } .sub { color: #555; margin: 0 0 40px; }
-  .cols { display: grid; grid-template-columns: 500px 1fr; gap: 40px; }
+  .cols { display: grid; grid-template-columns: 480px 1fr; gap: 40px; align-items: start; }
   .card { background: #fff; border-radius: 14px; padding: 26px; box-shadow: 0 2px 12px #0002; }
   .tag { font-size: 16px; font-weight: 600; color: #666; margin-bottom: 10px; }
-  /* The menu's own look: names as plain text beside the link's site, under its title and + button. */
-  .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-  .head b { font-size: 20px; }
-  .add { width: 40px; height: 40px; }
-  .add svg { display: block; fill: none; stroke: #0b6bcb; stroke-width: 1.3; }
-  .row { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 8px; margin-bottom: 14px; font-size: 17px; }
-  .names { display: flex; flex-wrap: wrap; gap: 4px 18px; padding-left: 8px; }
   .box { border: 1px solid #d6d6d6; border-radius: 12px; padding: 16px; margin-bottom: 18px; }
-  a { color: #0b6bcb; } .btn { display: inline-block; background: #0a449b; color: #fff; border-radius: 99px; padding: 6px 18px; font-size: 17px; margin-top: 10px; }
+  .card a { color: #0b6bcb; } .btn { display: inline-block; background: #0a449b; color: #fff; border-radius: 99px; padding: 6px 18px; font-size: 17px; margin-top: 10px; }
+  /* The menu in dark mode, with popup.html's own sizes and colors, at 1.2x. */
+  .menu { --bg: #1b1b1b; --fg: #eee; --weak: #a5a5a5; --line: #444; --accent: #6db3f8; zoom: 1.2; width: 400px; padding: 14px; border-radius: 8px; background: var(--bg); color: var(--fg); font: 13px/1.4 system-ui, sans-serif; box-shadow: 0 2px 12px #0004; }
+  .menu header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .menu b { font-size: 15px; }
+  .menu svg { display: block; fill: none; stroke: var(--accent); stroke-width: 1.3; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 6px; margin-bottom: 6px; }
+  .names { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-height: 28px; }
+  .chip { padding: 0 8px; border: 1px solid var(--line); border-radius: 999px; }
+  .link { display: flex; align-items: center; min-height: 28px; }
+  .link a { color: var(--accent); }
+  .note { margin: 26px 0 0; padding: 10px 30px 0 16px; color: var(--weak); list-style: none; }
+  .note li::before { content: "-"; position: absolute; margin-left: -10px; }
+  .note u { color: color-mix(in srgb, var(--weak) 70%, var(--bg)); text-underline-offset: 2px; }
 </style>
 <h1>Your names become links when you post</h1>
 <p class="sub">Type as normal. Links are added the moment you press Comment or Post.</p>
 <div class="cols">
-  <div class="card"><div class="tag">Set your names and links in the menu</div>
-    <div class="head"><b>Auto Hyperlink for Reddit</b><div class="add"><svg width="40" height="40" viewBox="0 0 34 34"><rect x="0.65" y="0.65" width="32.7" height="32.7" rx="4.35"/><path d="M17 10v14M10 17h14"/></svg></div></div>
-    <div class="row"><div class="names"><span>Tab Saver</span></div><a href="#">tabsaver.example.com</a></div>
-    <div class="row"><div class="names"><span>Focus Timer</span><span>FT</span></div><a href="#">focustimer.example.com</a></div>
-    <div class="row"><div class="names"><span>Dark Reader Lite</span></div><a href="#">darklite.example.com</a></div>
+  <div class="menu">
+    <header><b>Auto Hyperlink for Reddit</b><svg width="34" height="34" viewBox="0 0 34 34"><rect x="0.65" y="0.65" width="32.7" height="32.7" rx="4.35"/><path d="M17 10v14M10 17h14"/></svg></header>
+    <div class="row"><div class="names"><span class="chip">Tab Saver</span></div><div class="link"><a href="#">tabsaver.example.com</a></div></div>
+    <div class="row"><div class="names"><span class="chip">Focus Timer</span><span class="chip">FT</span></div><div class="link"><a href="#">focustimer.example.com</a></div></div>
+    <div class="row"><div class="names"><span class="chip">Dark Reader Lite</span></div><div class="link"><a href="#">darklite.example.com</a></div></div>
+    <ul class="note">
+      <li>Runs when you post, comment or edit.</li>
+      <li>First mention linked only.</li>
+      <li>If link is already in post or comment, it won't add to any other words/phrases from the list.</li>
+      <li>New entries apply to open/loaded tabs as well.</li>
+      <li><u>Back up</u> and <u>restore</u></li>
+    </ul>
   </div>
   <div class="card">
     <div class="tag">What you type</div>
