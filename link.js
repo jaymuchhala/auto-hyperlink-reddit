@@ -140,7 +140,7 @@
   }
 
   function linkBox(box) {
-    if (!box || settings.off || settings.skip?.includes(subreddit()) || !activeLinks().length) return;
+    if (!box || settings.off || settings.skip?.includes(subreddit()) || (settings.only?.length && !settings.only.includes(subreddit())) || !activeLinks().length) return;
     try {
       if (box.matches(TEXTAREA)) return linkMarkdown(box);
       // Switching to Markdown leaves mode="richText" and an empty rich editor behind, so go by what's showing.

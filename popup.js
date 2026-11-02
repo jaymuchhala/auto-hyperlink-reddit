@@ -29,16 +29,18 @@ const cleanSubs = (value) => [...new Set(String(value).split(/[\s,]+/).map((s) =
 
 const on = document.getElementById('on');
 const skip = document.getElementById('skip');
+const onlyIn = document.getElementById('only-in');
 const extras = document.getElementById('extras');
 const every = document.getElementById('every');
 
 function readSettings() {
-  return { off: !on.checked, skip: cleanSubs(skip.value), extras: extras.checked, every: every.checked };
+  return { off: !on.checked, skip: cleanSubs(skip.value), only: cleanSubs(onlyIn.value), extras: extras.checked, every: every.checked };
 }
 
 function showSettings(settings) {
   on.checked = !settings.off;
   skip.value = (settings.skip ?? []).join(', ');
+  onlyIn.value = (settings.only ?? []).join(', ');
   extras.checked = Boolean(settings.extras);
   every.checked = Boolean(settings.every);
   showMode();
@@ -51,8 +53,10 @@ function showMode() {
 }
 
 for (const box of [on, extras, every]) box.addEventListener('change', () => { showMode(); save(); });
-skip.addEventListener('input', saveSoon);
-skip.addEventListener('blur', () => { skip.value = cleanSubs(skip.value).join(', '); });
+for (const list of [skip, onlyIn]) {
+  list.addEventListener('input', saveSoon);
+  list.addEventListener('blur', () => { list.value = cleanSubs(list.value).join(', '); });
+}
 
 const cleanName = (value) => value.trim().replace(/\s+/g, ' ');
 
@@ -327,6 +331,7 @@ file.addEventListener('change', async () => {
       }
     }
     skip.value = cleanSubs(`${skip.value},${(settings?.skip ?? []).join()}`).join(', ');
+    onlyIn.value = cleanSubs(`${onlyIn.value},${(settings?.only ?? []).join()}`).join(', ');
     for (const r of [...rows.children]) if (!rowNames(r).length && !r.querySelectorAll('input')[1].value.trim()) r.remove();
     if (await save()) status.textContent = `Restored. ${added} new ${added === 1 ? 'link' : 'links'} added.${skipped ? ` ${skipped} ${skipped === 1 ? 'name' : 'names'} skipped, already used for another link.` : ''}`;
   } catch {

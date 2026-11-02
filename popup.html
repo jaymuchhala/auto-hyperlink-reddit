@@ -31,7 +31,7 @@
   .row.dragging { opacity: 0.4; }
   .only { grid-column: 1 / -1; }
   #settings { display: grid; gap: 8px; margin-top: 8px; }
-  #settings label:has(#skip) { display: grid; gap: 4px; }
+  #settings .list { display: grid; gap: 4px; }
   .names { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; min-height: 28px; }
   .names input { flex: 1; width: 0; }
   /* A chip removes itself on click. On hover it grows, pushing what's after it along, while its × stretches out. */
@@ -78,7 +78,8 @@
   <div id="rows"></div>
   <p id="status" role="status"></p>
   <div id="settings">
-    <label>Skip subreddits <input id="skip" placeholder="pics, askreddit, u/username"></label>
+    <label class="list">Only in subreddits <input id="only-in" placeholder="Blank: all subreddits"></label>
+    <label class="list">Skip subreddits <input id="skip" placeholder="pics, askreddit, u/username"></label>
     <label class="check"><input type="checkbox" id="extras"> Extra features</label>
     <label class="check extra"><input type="checkbox" id="every"> Link every mention</label>
   </div>
@@ -86,7 +87,7 @@
     <li>Runs when you post, comment or edit.</li>
     <li class="first-only">First mention linked only.</li>
     <li>Checkbox makes the word-matching case sensitive.</li>
-    <li>Enter u/your-username to the skip or "Only in subreddits" list for posts on those pages.</li>
+    <li>Enter u/your-username to a skip or "Only in subreddits" list for posts on those pages.</li>
     <li>Drag a row to reorder.</li>
     <li class="first-only">If link is already in post or comment, it won't add to any other words/phrases from the list.</li>
     <li>New entries apply to open/loaded tabs as well.</li>
