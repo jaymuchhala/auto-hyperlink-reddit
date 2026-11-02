@@ -1,6 +1,6 @@
 # Auto Hyperlink for Reddit
 
-Type as normal on Reddit. When you press **Post**, **Comment**, **Reply** or **Save**, names you've chosen (your Chrome extensions, for example) become links.
+Type as normal on Reddit. When you press **Post**, **Comment**, **Save** or **Save Edits**, names you've chosen (your Chrome extensions, for example) become links.
 
 You set the names and their links in the extension's toolbar menu.
 
