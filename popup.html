@@ -34,7 +34,9 @@
   .backup button { padding: 4px 10px; }
   button { font: inherit; color: inherit; background: transparent; border: 1px solid var(--line); border-radius: 5px; cursor: pointer; }
   /* The + is drawn, since a text + sits off-centre in its box. */
-  button.add { position: relative; flex: none; width: 34px; height: 34px; padding: 0; color: var(--accent); border-color: var(--accent); }
+  button.add { position: relative; flex: none; width: 34px; height: 34px; padding: 0; color: var(--accent); border-color: var(--accent); background: linear-gradient(var(--accent), var(--accent)) center / 0 0 no-repeat; transition: background-size 0.2s ease-out, color 0.2s ease-out; }
+  button.add:hover, button.add:focus-visible { color: var(--bg); background-size: 100% 100%; }
+  @media (prefers-reduced-motion: reduce) { button.add { transition: none; } }
   button.add::before, button.add::after { content: ""; position: absolute; top: 50%; left: 50%; width: 14px; height: 2px; border-radius: 1px; background: currentColor; transform: translate(-50%, -50%); }
   button.add::after { transform: translate(-50%, -50%) rotate(90deg); }
   #status { margin: 8px 0 0; min-height: 18px; }
