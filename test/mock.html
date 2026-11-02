@@ -2,11 +2,12 @@
 <!-- Local test page: real Lexical plus the comment composer markup from a saved Reddit page. Serve the project root and open /test/mock.html. -->
 <meta charset="utf-8"><title>mock</title>
 <body>
-<faceplate-form id="f1"><textarea name="title">Mute List title</textarea>
-<shreddit-composer id="c1" name="content" mode="richText">
+<faceplate-form id="post-submit-form"><textarea name="title">Mute List title</textarea>
+<fieldset><shreddit-composer id="c1" name="body" mode="richText">
   <div slot="rte" name="body" contenteditable="true" role="textbox" data-lexical-editor="true"></div>
   <button id="comment-composer-submit-button" slot="submit-button" type="submit"><span>Comment</span></button>
-</shreddit-composer></faceplate-form>
+</shreddit-composer></fieldset></faceplate-form>
+<r-post-form-submit-button id="submit-post-button" post-action-type="submit"></r-post-form-submit-button>
 <shreddit-composer id="c2" mode="markdown"><button slot="submit-button" type="submit">Comment</button></shreddit-composer>
 <form id="old"><textarea name="title">Mute List</textarea><textarea name="text"></textarea><button class="save" type="submit">save</button></form>
 <form id="search"><input name="q" value="Mute List"><button type="submit">Search</button></form>
@@ -21,6 +22,10 @@ class RedditLink extends LinkNode {
   exportJSON() { return { ...super.exportJSON(), type: 'reddit-link', version: 1 }; }
 }
 customElements.define('shreddit-composer', class extends HTMLElement {});
+const inner = document.createElement('button');
+inner.type = 'submit';
+inner.textContent = 'Post';
+document.getElementById('submit-post-button').attachShadow({ mode: 'open' }).append(inner);
 const root = document.querySelector('[data-lexical-editor]');
 const editor = L.createEditor({ namespace: 'm', nodes: [LinkNode, RedditLink], onError: (e) => { throw e; } });
 editor.setRootElement(root);

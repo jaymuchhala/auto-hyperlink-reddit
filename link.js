@@ -97,10 +97,9 @@
 
   addEventListener('click', (e) => {
     const path = e.composedPath();
-    const button = inPath(path, BUTTON);
-    if (!button) return;
+    if (!inPath(path, BUTTON)) return;
     linkBox(inPath(path, COMPOSER)
-      ?? (button.matches('#submit-post-button') ? document.querySelector(`#post-submit-form ${COMPOSER}, ${COMPOSER}`) : null)
+      ?? (inPath(path, '#submit-post-button') ? document.querySelector(`#post-submit-form ${COMPOSER}`) : null)
       ?? inPath(path, 'form')?.querySelector(TEXTAREA));
   }, true);
 
