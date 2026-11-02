@@ -17,7 +17,7 @@ Reddit changes its pages often. If something stops linking, please open an issue
 How it works
 - Add words or phrases and their links in the extension's toolbar menu.
 - Write your post or comment as usual.
-- When you press Post, Comment, Reply or Save, the first mention of each link's word or phrase becomes a link.
+- When you press Post, Comment, Save or Save Edits, the first mention of each link's word or phrase becomes a link.
 
 Details
 - Works in rich text and Markdown, in comments, replies, edits and post bodies, on new and old Reddit.
@@ -46,7 +46,7 @@ Not affiliated with or endorsed by Reddit.
 
 **storage justification:** Saves the words or phrases and links the user enters in the extension's menu.
 
-**Host permission justification:** Needed on Reddit (www, new, sh and old) to add links to the box the user is submitting. It runs only on these sites and only when a submit button is pressed.
+**Host permission justification:** Needed on Reddit (www, new, sh and old) to add links to the box the user is submitting. It works only on these sites and adds links only when the user submits (Post, Comment, Save, Save Edits or Cmd/Ctrl+Enter).
 
 **Remote code:** No, I am not using remote code.
 
