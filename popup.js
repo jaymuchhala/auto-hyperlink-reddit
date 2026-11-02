@@ -18,7 +18,8 @@ function cleanUrl(value) {
   const text = value.trim();
   if (!text) return null;
   try {
-    const url = new URL(/^[a-z][a-z0-9+.-]*:/i.test(text) ? text : `https://${text}`);
+    // example.com:8080 has a port, not a scheme.
+    const url = new URL(/^[a-z][a-z0-9+.-]*:(?!\d+(?:[/?#]|$))/i.test(text) ? text : `https://${text}`);
     return /^https?:$/.test(url.protocol) && url.hostname.includes('.') ? url.href : null;
   } catch { return null; }
 }
@@ -31,12 +32,14 @@ const namesOf = (link) => (Array.isArray(link.names) ? link.names : String(link.
 // Waits for a pause in typing: storage.sync refuses more than 120 writes a minute.
 let saveTimer = null;
 let keepStatus = false; // the next save leaves the status message up
+let lastSaved = null; // this window's own last write, to tell it from another window's
 function saveSoon() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(save, 400);
 }
 addEventListener('pagehide', () => { if (saveTimer !== null) save(); });
 
+// Returns whether it saved.
 async function save() {
   clearTimeout(saveTimer);
   saveTimer = null;
@@ -46,14 +49,19 @@ async function save() {
     const address = cleanUrl(url.value);
     const names = rowNames(row);
     url.setAttribute('aria-invalid', String(Boolean(url.value.trim()) && !address));
-    if (names.length && address) links.push({ names, url: address });
+    // A half-typed change keeps the last good link: the menu can close at any moment.
+    if (address) row.dataset.saved = address;
+    if (names.length && row.dataset.saved) links.push({ names, url: row.dataset.saved });
   }
   try {
+    lastSaved = JSON.stringify(links);
     await chrome.storage.sync.set({ links });
     if (!keepStatus) status.textContent = '';
     keepStatus = false;
+    return true;
   } catch (err) {
     status.textContent = `Couldn't save: ${err.message}`;
+    return false;
   }
 }
 
@@ -124,6 +132,7 @@ function addNames(row, names) {
 function addRow(link = { names: [], url: '' }) {
   const row = document.createElement('div');
   row.className = 'row';
+  if (cleanUrl(link.url)) row.dataset.saved = cleanUrl(link.url);
   let settle;
   let merged = false;
   const names = Object.assign(document.createElement('div'), { className: 'names' });
@@ -194,13 +203,13 @@ function addRow(link = { names: [], url: '' }) {
 document.getElementById('add').addEventListener('click', () => addRow().querySelector('input').focus());
 
 document.getElementById('backup').addEventListener('click', async () => {
-  await save();
+  const saved = await save();
   const { links = [] } = await chrome.storage.sync.get('links');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([JSON.stringify({ app: 'auto-hyperlink-reddit', links }, null, 2)], { type: 'application/json' }));
   a.download = `auto-hyperlink-reddit-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
-  status.textContent = `Backed up ${links.length} ${links.length === 1 ? 'link' : 'links'}.`;
+  if (saved) status.textContent = `Backed up ${links.length} ${links.length === 1 ? 'link' : 'links'}.`;
 });
 
 // The toolbar menu closes when a file picker opens, so restoring happens in a tab.
@@ -233,15 +242,27 @@ file.addEventListener('change', async () => {
       }
     }
     for (const r of [...rows.children]) if (!rowNames(r).length && !r.querySelectorAll('input')[1].value.trim()) r.remove();
-    await save();
-    status.textContent = `Restored. ${added} new ${added === 1 ? 'link' : 'links'} added.${skipped ? ` ${skipped} ${skipped === 1 ? 'name' : 'names'} skipped, already used for another link.` : ''}`;
+    if (await save()) status.textContent = `Restored. ${added} new ${added === 1 ? 'link' : 'links'} added.${skipped ? ` ${skipped} ${skipped === 1 ? 'name' : 'names'} skipped, already used for another link.` : ''}`;
   } catch {
     status.textContent = "That file isn't a backup from this extension.";
   }
   file.value = '';
 });
 
-chrome.storage.sync.get('links').then(({ links = [] }) => {
-  links.forEach(addRow);
+function render(links) {
+  rows.replaceChildren();
+  links.forEach((link) => addRow(link));
   if (!links.length) addRow();
+}
+
+chrome.storage.sync.get('links').then(({ links = [] }) => render(links));
+
+// Saving writes the whole list, so a window left open has to keep up or it would undo the other's changes.
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== 'sync' || !changes.links) return;
+  const links = changes.links.newValue ?? [];
+  if (JSON.stringify(links) === lastSaved) return;
+  clearTimeout(saveTimer);
+  saveTimer = null;
+  render(links);
 });
