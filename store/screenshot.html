@@ -6,8 +6,13 @@
   .cols { display: grid; grid-template-columns: 500px 1fr; gap: 40px; }
   .card { background: #fff; border-radius: 14px; padding: 26px; box-shadow: 0 2px 12px #0002; }
   .tag { font-size: 16px; font-weight: 600; color: #666; margin-bottom: 10px; }
-  .row { display: grid; grid-template-columns: 1fr 1.25fr; gap: 8px; margin-bottom: 8px; }
-  .in { border: 1px solid #d6d6d6; border-radius: 6px; padding: 8px 10px; font-size: 16px; overflow: hidden; white-space: nowrap; }
+  /* The menu's own look: names as plain text beside the link's site, under its title and + button. */
+  .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .head b { font-size: 20px; }
+  .add { width: 40px; height: 40px; }
+  .add svg { display: block; fill: none; stroke: #0b6bcb; stroke-width: 1.3; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 8px; margin-bottom: 14px; font-size: 17px; }
+  .names { display: flex; flex-wrap: wrap; gap: 4px 18px; padding-left: 8px; }
   .box { border: 1px solid #d6d6d6; border-radius: 12px; padding: 16px; margin-bottom: 18px; }
   a { color: #0b6bcb; } .btn { display: inline-block; background: #0a449b; color: #fff; border-radius: 99px; padding: 6px 18px; font-size: 17px; margin-top: 10px; }
 </style>
@@ -15,9 +20,10 @@
 <p class="sub">Type as normal. Links are added the moment you press Comment or Post.</p>
 <div class="cols">
   <div class="card"><div class="tag">Set your names and links in the menu</div>
-    <div class="row"><div class="in">Tab Saver</div><div class="in">example.com/tab-saver</div></div>
-    <div class="row"><div class="in">Focus Timer</div><div class="in">example.com/focus-timer</div></div>
-    <div class="row"><div class="in">Dark Reader Lite</div><div class="in">example.com/dark-lite</div></div>
+    <div class="head"><b>Auto Hyperlink for Reddit</b><div class="add"><svg width="40" height="40" viewBox="0 0 34 34"><rect x="0.65" y="0.65" width="32.7" height="32.7" rx="4.35"/><path d="M17 10v14M10 17h14"/></svg></div></div>
+    <div class="row"><div class="names"><span>Tab Saver</span></div><a href="#">tabsaver.example.com</a></div>
+    <div class="row"><div class="names"><span>Focus Timer</span><span>FT</span></div><a href="#">focustimer.example.com</a></div>
+    <div class="row"><div class="names"><span>Dark Reader Lite</span></div><a href="#">darklite.example.com</a></div>
   </div>
   <div class="card">
     <div class="tag">What you type</div>
