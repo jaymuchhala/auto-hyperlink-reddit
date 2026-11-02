@@ -108,6 +108,7 @@ function addNames(row, names) {
 function addRow(link = { names: [], url: '' }) {
   const row = document.createElement('div');
   row.className = 'row';
+  let settle;
   const names = Object.assign(document.createElement('div'), { className: 'names' });
   const nameInput = Object.assign(document.createElement('input'), { placeholder: 'Name' });
   nameInput.setAttribute('aria-label', 'Add a name');
@@ -122,6 +123,7 @@ function addRow(link = { names: [], url: '' }) {
       notice = `“${taken[0].name}” already goes to ${taken[0].url}. Use a different name for this link.`;
       status.textContent = notice;
     }
+    settle();
     saveSoon();
   };
   // Enter or leaving the box turns what's typed into a chip. Names can hold commas.
@@ -131,18 +133,33 @@ function addRow(link = { names: [], url: '' }) {
   const urlInput = Object.assign(document.createElement('input'), { placeholder: 'https://chromewebstore.google.com/…', value: link.url });
   urlInput.setAttribute('aria-label', 'Link');
   urlInput.addEventListener('input', saveSoon);
-  const open = Object.assign(document.createElement('a'), { className: 'open', target: '_blank', rel: 'noopener', textContent: '↗', title: 'Open link' });
-  open.setAttribute('aria-label', 'Open link');
-  const syncOpen = () => {
+  // A row with a name and a valid link shows the link as plain text. Its × goes back to the box.
+  const view = Object.assign(document.createElement('div'), { className: 'link-view' });
+  const anchor = Object.assign(document.createElement('a'), { target: '_blank', rel: 'noopener' });
+  const change = Object.assign(document.createElement('button'), { type: 'button', className: 'change', textContent: '×', title: 'Change link' });
+  change.setAttribute('aria-label', 'Change link');
+  change.addEventListener('click', () => {
+    view.hidden = true;
+    urlInput.hidden = false;
+    urlInput.select();
+  });
+  view.append(anchor, change);
+  settle = () => {
     const url = cleanUrl(urlInput.value);
-    open.style.visibility = url ? 'visible' : 'hidden';
-    if (url) open.href = url;
+    const done = Boolean(url) && rowNames(row).length > 0;
+    view.hidden = !done;
+    urlInput.hidden = done;
+    if (!done) return;
+    anchor.href = url;
+    anchor.title = url;
+    anchor.textContent = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
   };
-  urlInput.addEventListener('input', syncOpen);
-  syncOpen();
-  row.append(names, urlInput, open);
+  urlInput.addEventListener('blur', settle);
+  urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') settle(); });
+  row.append(names, urlInput, view);
   rows.append(row);
   addNames(row, namesOf(link));
+  settle();
   return row;
 }
 

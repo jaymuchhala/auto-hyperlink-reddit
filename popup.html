@@ -10,7 +10,7 @@
   header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
   h1 { font-size: 15px; margin: 0; }
   p { margin: 0 0 12px; color: var(--weak); }
-  .row { display: grid; grid-template-columns: 1.2fr 1.2fr 26px; align-items: start; gap: 6px; margin-bottom: 6px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 6px; margin-bottom: 6px; }
   input { min-width: 0; padding: 5px 7px; border: 1px solid var(--line); border-radius: 5px; background: transparent; color: inherit; font: inherit; }
   input[aria-invalid="true"] { border-color: #d33; }
   .names { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; padding: 3px 4px; border: 1px solid var(--line); border-radius: 5px; cursor: text; }
@@ -25,11 +25,18 @@
   .chip:hover .x::before, .chip:focus-visible .x::before { transform: translate(-50%, -50%) rotate(45deg); }
   .chip:hover .x::after, .chip:focus-visible .x::after { transform: translate(-50%, -50%) rotate(-45deg); }
   @media (prefers-reduced-motion: reduce) { .chip, .chip .x, .chip .x::before, .chip .x::after { transition: none; } }
-  .open { display: flex; height: 28px; align-items: center; justify-content: center; color: var(--accent); text-decoration: none; border: 1px solid var(--line); border-radius: 5px; }
+  .link-view { display: flex; align-items: center; gap: 4px; min-width: 0; min-height: 28px; }
+  .link-view[hidden] { display: none; }
+  .link-view a { overflow: hidden; color: var(--accent); text-overflow: ellipsis; white-space: nowrap; }
+  .change { flex: none; width: 18px; height: 18px; padding: 0; border: 0; color: var(--danger); line-height: 1; visibility: hidden; }
+  .link-view:hover .change, .change:focus-visible { visibility: visible; }
   .backup { display: flex; gap: 6px; margin-top: 10px; }
   .backup button { padding: 4px 10px; }
   button { font: inherit; color: inherit; background: transparent; border: 1px solid var(--line); border-radius: 5px; cursor: pointer; }
-  button.add { width: 26px; height: 26px; padding: 0; font-size: 18px; line-height: 1; color: var(--accent); border-color: var(--accent); }
+  /* The + is drawn, since a text + sits off-centre in its box. */
+  button.add { position: relative; flex: none; width: 34px; height: 34px; padding: 0; color: var(--accent); border-color: var(--accent); }
+  button.add::before, button.add::after { content: ""; position: absolute; top: 50%; left: 50%; width: 14px; height: 2px; border-radius: 1px; background: currentColor; transform: translate(-50%, -50%); }
+  button.add::after { transform: translate(-50%, -50%) rotate(90deg); }
   #status { margin: 8px 0 0; min-height: 18px; }
   .note { margin: 8px 0 0; padding-top: 10px; border-top: 1px solid var(--line); }
 </style>
@@ -37,7 +44,7 @@
 <body>
   <header>
     <h1>Auto Hyperlink for Reddit</h1>
-    <button class="add" id="add" type="button" title="Add a name" aria-label="Add a name">+</button>
+    <button class="add" id="add" type="button" title="Add a name" aria-label="Add a name"></button>
   </header>
   <div id="rows"></div>
   <p id="status" role="status"></p>
