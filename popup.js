@@ -100,7 +100,7 @@ async function save() {
     if (address && names.length) row.dataset.saved = address;
     // Left out when unset: all links share one storage item, with a size limit.
     const { exact, all, subs } = rowFlags(row);
-    const options = { ...(exact.length && { exact }), ...(all.length && { all }), ...(Object.keys(subs).length && { subs }), ...(cleanSubs(row.querySelector('.only').value).length && { only: cleanSubs(row.querySelector('.only').value) }) };
+    const options = { ...(exact.length && { exact }), ...(all.length && { all }), ...(Object.keys(subs).length && { subs }) };
     if (names.length && row.dataset.saved) links.push({ names, url: row.dataset.saved, ...options });
     // A name waiting for a link, or a link for a name, stays on this computer and out of what link.js reads.
     else if (names.length || url.value.trim()) drafts.push({ names, url: url.value.trim(), ...options });
@@ -206,7 +206,7 @@ function addNames(row, names, from) {
       const edit = row.querySelector('.word-only');
       edit.chip = chip;
       edit.value = chip.dataset.only ?? '';
-      edit.placeholder = `Only “${name}” in subreddits (blank: same as row)`;
+      edit.placeholder = `Only “${name}” in subreddits (blank: all)`;
       edit.hidden = false;
       chip.classList.add('editing');
       edit.focus();
@@ -226,7 +226,8 @@ function addNames(row, names, from) {
     tools.append(x, flagButton(chip, 'exact', 'Aa', 'Case sensitive'), every, subs);
     const word = Object.assign(document.createElement('span'), { className: 'word', textContent: name });
     chip.append(word, tools);
-    setWordSubs(chip, from?.subs?.[name] ?? []);
+    // only is what older data has: one list for a whole row.
+    setWordSubs(chip, from?.subs?.[name] ?? from?.only ?? []);
     // .tight: a chip at the end of a line grows over what's next instead, since
     // wrapping would pull it out from under the pointer.
     const checkRoom = () => {
@@ -310,10 +311,6 @@ function addRow(link = { names: [], url: '' }) {
   };
   urlInput.addEventListener('blur', settle);
   urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') settle(); });
-  const only = Object.assign(document.createElement('input'), { className: 'only extra', placeholder: 'Only in subreddits (blank: all)', value: (link.only ?? []).join(', ') });
-  only.setAttribute('aria-label', 'Only in these subreddits');
-  only.addEventListener('input', saveSoon);
-  only.addEventListener('blur', () => { only.value = cleanSubs(only.value).join(', '); });
   // Opens under the names when a word's r/ is clicked.
   const wordOnly = Object.assign(document.createElement('input'), { className: 'word-only extra', hidden: true });
   wordOnly.setAttribute('aria-label', 'Only in these subreddits, for this word');
@@ -327,7 +324,7 @@ function addRow(link = { names: [], url: '' }) {
   };
   wordOnly.addEventListener('blur', closeWordOnly);
   wordOnly.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === 'Escape') closeWordOnly(); });
-  row.append(names, urlInput, view, wordOnly, only);
+  row.append(names, urlInput, view, wordOnly);
   rows.append(row);
   addNames(row, namesOf(link), link);
   settle();

@@ -33,8 +33,7 @@ Titles are never changed. Neither are search boxes or any other field, including
 - **Extra features**: off by default, and what they set is kept but not used while off.
   - **All**: hover a word and click it to link every mention of that word instead of only the first. The word fills in.
   - **Case sensitive by default (new words)**: new words start with **Aa** on. Existing words stay as they are.
-  - **Only in subreddits**: limits a row to those subreddits. It's skipped everywhere else.
-  - **r/**: hover a word and click it to give that word its own subreddits, which replace the row's list for that word. The word gets a dotted underline.
+  - **r/**: hover a word and click it to limit that word to the subreddits you list. It's skipped everywhere else, and the word gets a dotted underline.
 
 Drag a row to reorder the list. The subreddit comes from the page's address when you submit.
 

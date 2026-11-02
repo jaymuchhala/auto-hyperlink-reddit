@@ -23,7 +23,7 @@
   // One list applies at a time. A blank Only in subreddits list means everywhere.
   const listsAllow = () => (settings.onlyOn ? !settings.only?.length || settings.only.includes(subreddit()) : !settings.skipOn || !settings.skip?.includes(subreddit()));
   // A link can have several names. Early versions saved them as one comma-joined string.
-  // A word's own subreddits replace its row's.
+  // Each word has its own subreddits. Older data has one list for a whole row.
   const activeNames = () => links.flatMap((l) => (l.names ?? l.name.split(',')).map((n) => ({ name: n.trim().replace(/\s+/g, ' '), link: l }))).filter(({ name, link }) => {
     const list = link.subs?.[name] ?? link.only;
     return !list?.length || list.includes(subreddit());
