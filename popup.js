@@ -6,6 +6,13 @@ if (!('update_url' in chrome.runtime.getManifest())) {
 const rows = document.getElementById('rows');
 const status = document.getElementById('status');
 
+// Shows a link the way a saved row does: just the site, with the full address on hover.
+function setLink(anchor, url) {
+  anchor.href = url;
+  anchor.title = url;
+  anchor.textContent = new URL(url).host;
+}
+
 // Returns a full http(s) address, or null if it isn't one.
 function cleanUrl(value) {
   const text = value.trim();
@@ -23,7 +30,7 @@ const namesOf = (link) => (Array.isArray(link.names) ? link.names : String(link.
 
 // Waits for a pause in typing: storage.sync refuses more than 120 writes a minute.
 let saveTimer = null;
-let notice = ''; // shown by the next save instead of its usual message
+let keepStatus = false; // the next save leaves the status message up
 function saveSoon() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(save, 400);
@@ -43,8 +50,8 @@ async function save() {
   }
   try {
     await chrome.storage.sync.set({ links });
-    status.textContent = notice;
-    notice = '';
+    if (!keepStatus) status.textContent = '';
+    keepStatus = false;
   } catch (err) {
     status.textContent = `Couldn't save: ${err.message}`;
   }
@@ -58,10 +65,23 @@ function checkNames(names, row) {
   const taken = [];
   for (const name of names) {
     const other = [...rows.children].find((r) => r !== row && [...r.querySelectorAll('.chip')].some((c) => key(c.dataset.name) === key(name)));
-    if (other) taken.push({ name, url: other.querySelectorAll('input')[1].value.trim() });
+    if (other) taken.push({ name, url: cleanUrl(other.querySelectorAll('input')[1].value) });
     else free.push(name);
   }
   return { free, taken };
+}
+
+// Warns that a name is in use. The other row may not have a valid link yet.
+function showTaken({ name, url }) {
+  const warning = Object.assign(document.createElement('span'), { className: 'warning' });
+  if (url) {
+    const anchor = Object.assign(document.createElement('a'), { target: '_blank', rel: 'noopener' });
+    setLink(anchor, url);
+    warning.append(`“${name}” is linked to `, anchor);
+  } else {
+    warning.append(`“${name}” is already in another row`);
+  }
+  status.replaceChildren(warning);
 }
 
 // The row's names: its chips, plus anything typed that isn't a chip yet.
@@ -116,8 +136,8 @@ function addRow(link = { names: [], url: '' }) {
     addNames(row, free);
     nameInput.value = '';
     if (taken.length) {
-      notice = `“${taken[0].name}” already goes to ${taken[0].url}. Use a different name for this link.`;
-      status.textContent = notice;
+      showTaken(taken[0]);
+      keepStatus = true;
     }
     settle();
     saveSoon();
@@ -160,9 +180,7 @@ function addRow(link = { names: [], url: '' }) {
     view.hidden = !done;
     urlInput.hidden = done;
     if (!done) return;
-    anchor.href = url;
-    anchor.title = url;
-    anchor.textContent = new URL(url).host;
+    setLink(anchor, url);
   };
   urlInput.addEventListener('blur', settle);
   urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') settle(); });

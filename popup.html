@@ -40,6 +40,10 @@
   button.add:hover rect, button.add:focus-visible rect { stroke: color-mix(in srgb, var(--accent) 45%, transparent); }
   @media (prefers-reduced-motion: reduce) { button.add, button.add rect { transition: none; } }
   #status { margin: 8px 0 0; min-height: 18px; }
+  .warning { display: block; padding: 6px 9px; border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent); border-radius: 5px; background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--fg); overflow-wrap: anywhere; animation: warning-in 0.15s ease-out; }
+  .warning a { color: var(--accent); }
+  @keyframes warning-in { from { opacity: 0; transform: translateY(-3px); } }
+  @media (prefers-reduced-motion: reduce) { .warning { animation: none; } }
   .note { margin: 8px 0 0; padding: 10px 0 0 16px; border-top: 1px solid var(--line); color: var(--weak); list-style: none; }
   .note li::before { content: "-"; position: absolute; margin-left: -10px; }
 </style>
