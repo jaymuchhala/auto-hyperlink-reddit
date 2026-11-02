@@ -12,8 +12,9 @@
   const sameUrl = (url) => url.replace(/\/+$/, '').toLowerCase();
 
   function rules() {
-    // A row's name can hold several names for one link, separated by commas.
-    const urls = new Map(links.flatMap((l) => l.name.split(',').map((n) => [key(n), l.url])));
+    // A link can have several names. Early versions saved them as one comma-joined string.
+    // If a name is ever on two rows, the higher row wins.
+    const urls = new Map(links.flatMap((l) => (l.names ?? l.name.split(',')).map((n) => [key(n), l.url])).reverse());
     const sorted = [...urls.keys()].sort((a, b) => b.length - a.length); // longest name wins
     const names = sorted.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '\\s+'));
     return {

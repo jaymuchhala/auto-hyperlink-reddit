@@ -16,11 +16,14 @@ function cleanUrl(value) {
   } catch { return null; }
 }
 
-// Several names for one link are separated by commas.
-const cleanNames = (value) => value.split(',').map((n) => n.trim()).filter(Boolean).join(', ');
+const cleanName = (value) => value.trim().replace(/\s+/g, ' ');
+
+// A saved link's names. Early versions saved them as one comma-joined string.
+const namesOf = (link) => (Array.isArray(link.names) ? link.names : String(link.name ?? '').split(',')).map((n) => cleanName(String(n))).filter(Boolean);
 
 // Waits for a pause in typing: storage.sync refuses more than 120 writes a minute.
 let saveTimer = null;
+let notice = ''; // shown by the next save instead of its usual message
 function saveSoon() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(save, 400);
@@ -35,30 +38,45 @@ async function save() {
   for (const row of rows.children) {
     const [, url] = row.querySelectorAll('input');
     const address = cleanUrl(url.value);
-    const nameValue = rowNames(row).join(', ');
+    const names = rowNames(row);
     url.setAttribute('aria-invalid', String(Boolean(url.value.trim()) && !address));
-    if (nameValue && address) links.push({ name: nameValue, url: address });
-    else if (nameValue || url.value.trim()) unfinished = true;
+    if (names.length && address) links.push({ names, url: address });
+    else if (names.length || url.value.trim()) unfinished = true;
   }
   try {
     await chrome.storage.sync.set({ links });
-    status.textContent = unfinished ? 'Rows need a name and a valid address to count.' : 'Saved. It applies to open Reddit tabs too.';
+    status.textContent = notice || (unfinished ? 'Rows need a name and a valid address to count.' : 'Saved. It applies to open Reddit tabs too.');
+    notice = '';
   } catch (err) {
     status.textContent = `Couldn't save: ${err.message}`;
   }
 }
 
+// A name can only have one link: nothing at posting time could say which to use.
+// Splits names into those free to add to this row and those another row has.
+function checkNames(names, row) {
+  const key = (name) => name.toLowerCase();
+  const free = [];
+  const taken = [];
+  for (const name of names) {
+    const other = [...rows.children].find((r) => r !== row && [...r.querySelectorAll('.chip')].some((c) => key(c.dataset.name) === key(name)));
+    if (other) taken.push({ name, url: other.querySelectorAll('input')[1].value.trim() });
+    else free.push(name);
+  }
+  return { free, taken };
+}
+
 // The row's names: its chips, plus anything typed that isn't a chip yet.
 function rowNames(row) {
-  const typed = row.querySelector('.names input').value;
-  return [...row.querySelectorAll('.chip')].map((c) => c.dataset.name).concat(cleanNames(typed).split(', ').filter(Boolean));
+  const typed = cleanName(row.querySelector('.names input').value);
+  return [...row.querySelectorAll('.chip')].map((c) => c.dataset.name).concat(typed ? [typed] : []);
 }
 
 // Adds names to a row as chips, leaving out any it already has.
-function addNames(row, value) {
+function addNames(row, names) {
   const box = row.querySelector('.names');
   const input = box.querySelector('input');
-  for (const name of cleanNames(value).split(', ').filter(Boolean)) {
+  for (const name of names) {
     const have = [...box.querySelectorAll('.chip')].some((c) => c.dataset.name.toLowerCase() === name.toLowerCase());
     if (have) continue;
     const chip = Object.assign(document.createElement('button'), { type: 'button', className: 'chip' });
@@ -87,7 +105,7 @@ function addNames(row, value) {
   input.placeholder = box.querySelector('.chip') ? 'Other name' : 'Name';
 }
 
-function addRow(link = { name: '', url: '' }) {
+function addRow(link = { names: [], url: '' }) {
   const row = document.createElement('div');
   row.className = 'row';
   const names = Object.assign(document.createElement('div'), { className: 'names' });
@@ -97,12 +115,17 @@ function addRow(link = { name: '', url: '' }) {
   names.addEventListener('click', (e) => { if (e.target === names) nameInput.focus(); });
   const commit = () => {
     if (!nameInput.value.trim()) return;
-    addNames(row, nameInput.value);
+    const { free, taken } = checkNames([cleanName(nameInput.value)], row);
+    addNames(row, free);
     nameInput.value = '';
+    if (taken.length) {
+      notice = `“${taken[0].name}” already goes to ${taken[0].url}. Use a different name for this link.`;
+      status.textContent = notice;
+    }
     saveSoon();
   };
-  // A comma, Enter or leaving the box turns what's typed into a chip.
-  nameInput.addEventListener('input', () => { if (nameInput.value.includes(',')) commit(); else saveSoon(); });
+  // Enter or leaving the box turns what's typed into a chip. Names can hold commas.
+  nameInput.addEventListener('input', saveSoon);
   nameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') commit(); });
   nameInput.addEventListener('blur', commit);
   const urlInput = Object.assign(document.createElement('input'), { placeholder: 'https://chromewebstore.google.com/…', value: link.url });
@@ -119,7 +142,7 @@ function addRow(link = { name: '', url: '' }) {
   syncOpen();
   row.append(names, urlInput, open);
   rows.append(row);
-  addNames(row, link.name);
+  addNames(row, namesOf(link));
   return row;
 }
 
@@ -149,21 +172,24 @@ file.addEventListener('change', async () => {
   try {
     const { links } = JSON.parse(await file.files[0].text());
     let added = 0;
+    let skipped = 0;
     for (const link of links) {
       const url = cleanUrl(String(link.url));
-      const names = cleanNames(String(link.name));
-      if (!url || !names) continue;
+      if (!url) continue;
       const row = [...rows.children].find((r) => cleanUrl(r.querySelectorAll('input')[1].value) === url);
+      const { free: names, taken } = checkNames(namesOf(link), row);
+      skipped += taken.length;
+      if (!names.length) continue;
       if (row) {
         addNames(row, names);
       } else {
-        addRow({ name: names, url });
+        addRow({ names, url });
         added++;
       }
     }
     for (const r of [...rows.children]) if (!rowNames(r).length && !r.querySelectorAll('input')[1].value.trim()) r.remove();
     await save();
-    status.textContent = `Restored. ${added} new ${added === 1 ? 'link' : 'links'} added.`;
+    status.textContent = `Restored. ${added} new ${added === 1 ? 'link' : 'links'} added.${skipped ? ` ${skipped} ${skipped === 1 ? 'name' : 'names'} skipped, already used for another link.` : ''}`;
   } catch {
     status.textContent = "That file isn't a backup from this extension.";
   }
