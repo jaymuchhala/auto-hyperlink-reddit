@@ -27,7 +27,7 @@ Titles are never changed. Neither are search boxes or any other field, including
 
 ## Your data
 
-Names and links save as you type, in Chrome's extension storage, and sync between your browsers if Chrome sync is on. There's room for roughly 80 links. Uninstalling removes them, so use **Back up** in the menu to save them to a file. **Restore** adds a backup to your current list and never removes anything.
+Names and links save as you type, in Chrome's extension storage, and sync between your browsers if Chrome sync is on. There's room for roughly 80 links. A name with no link yet stays in the menu until you add one, on that computer only, and isn't used on Reddit. Uninstalling removes them, so use **Back up** in the menu to save them to a file. **Restore** adds a backup to your current list and never removes anything.
 
 ## Light by design
 

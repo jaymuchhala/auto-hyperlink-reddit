@@ -32,7 +32,8 @@ const namesOf = (link) => (Array.isArray(link.names) ? link.names : String(link.
 // Waits for a pause in typing: storage.sync refuses more than 120 writes a minute.
 let saveTimer = null;
 let keepStatus = false; // the next save leaves the status message up
-let lastSaved = null; // this window's own last write, to tell it from another window's
+let lastSaved = null; // this window's own last writes, to tell them from another window's
+let lastDrafts = null;
 function saveSoon() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(save, 400);
@@ -44,6 +45,7 @@ async function save() {
   clearTimeout(saveTimer);
   saveTimer = null;
   const links = [];
+  const drafts = [];
   for (const row of rows.children) {
     const [, url] = row.querySelectorAll('input');
     const address = cleanUrl(url.value);
@@ -52,10 +54,14 @@ async function save() {
     // A half-typed change keeps the last good link: the menu can close at any moment.
     if (address) row.dataset.saved = address;
     if (names.length && row.dataset.saved) links.push({ names, url: row.dataset.saved });
+    // Names waiting for a link stay on this computer, and out of what link.js reads.
+    else if (names.length) drafts.push({ names, url: url.value.trim() });
   }
   try {
     lastSaved = JSON.stringify(links);
-    await chrome.storage.sync.set({ links });
+    lastDrafts = JSON.stringify(drafts);
+    // Both start now: on pagehide, nothing after the first await would run.
+    await Promise.all([chrome.storage.sync.set({ links }), chrome.storage.local.set({ drafts })]);
     if (!keepStatus) status.textContent = '';
     keepStatus = false;
     return true;
@@ -161,6 +167,7 @@ function addRow(link = { names: [], url: '' }) {
   nameInput.addEventListener('blur', commit);
   const urlInput = Object.assign(document.createElement('input'), { placeholder: 'https://chromewebstore.google.com/…', value: link.url });
   urlInput.setAttribute('aria-label', 'Link');
+  urlInput.setAttribute('aria-invalid', String(Boolean(link.url) && !cleanUrl(link.url)));
   urlInput.addEventListener('input', saveSoon);
   // A row with a name and a valid link shows the link as plain text. Its × goes back to the box.
   const view = Object.assign(document.createElement('div'), { className: 'link-view' });
@@ -265,20 +272,30 @@ function fitNote() {
 }
 new MutationObserver(fitNote).observe(rows, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
 
-function render(links) {
+function render(links, drafts) {
   rows.replaceChildren();
   links.forEach((link) => addRow(link));
-  if (!links.length) addRow();
+  // A draft's name may have been given a link in another window since.
+  for (const draft of drafts) {
+    const { free } = checkNames(namesOf(draft), null);
+    if (free.length) addRow({ names: free, url: draft.url });
+  }
+  if (!rows.children.length) addRow();
 }
 
-chrome.storage.sync.get('links').then(({ links = [] }) => render(links));
+async function load() {
+  const [{ links = [] }, { drafts = [] }] = await Promise.all([chrome.storage.sync.get('links'), chrome.storage.local.get('drafts')]);
+  render(links, drafts);
+}
+
+// Opens ready to paste the link for the first name still waiting for one.
+load().then(() => [...rows.children].find((row) => !row.dataset.saved && rowNames(row).length)?.querySelectorAll('input')[1].focus());
 
 // Saving writes the whole list, so a window left open has to keep up or it would undo the other's changes.
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area !== 'sync' || !changes.links) return;
-  const links = changes.links.newValue ?? [];
-  if (JSON.stringify(links) === lastSaved) return;
+  const change = area === 'sync' ? changes.links : area === 'local' ? changes.drafts : null;
+  if (!change || JSON.stringify(change.newValue ?? []) === (area === 'sync' ? lastSaved : lastDrafts)) return;
   clearTimeout(saveTimer);
   saveTimer = null;
-  render(links);
+  load();
 });
