@@ -20,6 +20,8 @@
     const [, kind, name] = location.pathname.toLowerCase().match(/^\/(r|u|user)\/([^/]+)/) ?? [];
     return kind && (kind === 'r' ? name : `u/${name}`);
   };
+  // With an Only in subreddits list, the skip list isn't used.
+  const listsAllow = () => (settings.only?.length ? settings.only.includes(subreddit()) : !settings.skip?.includes(subreddit()));
   const activeLinks = () => links.filter((l) => !l.only?.length || l.only.includes(subreddit()));
 
   function rules() {
@@ -140,7 +142,7 @@
   }
 
   function linkBox(box) {
-    if (!box || settings.off || settings.skip?.includes(subreddit()) || (settings.only?.length && !settings.only.includes(subreddit())) || !activeLinks().length) return;
+    if (!box || settings.off || !listsAllow() || !activeLinks().length) return;
     try {
       if (box.matches(TEXTAREA)) return linkMarkdown(box);
       // Switching to Markdown leaves mode="richText" and an empty rich editor behind, so go by what's showing.

@@ -50,11 +50,12 @@ function showMode() {
   document.body.classList.toggle('off', !on.checked);
   document.body.classList.toggle('extras', extras.checked);
   document.body.classList.toggle('every', extras.checked && every.checked);
+  document.body.classList.toggle('only-set', cleanSubs(onlyIn.value).length > 0);
 }
 
 for (const box of [on, extras, every]) box.addEventListener('change', () => { showMode(); save(); });
 for (const list of [skip, onlyIn]) {
-  list.addEventListener('input', saveSoon);
+  list.addEventListener('input', () => { showMode(); saveSoon(); });
   list.addEventListener('blur', () => { list.value = cleanSubs(list.value).join(', '); });
 }
 
