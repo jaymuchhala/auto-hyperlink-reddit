@@ -3,7 +3,7 @@
 const send = async () => {
   const { links = [], settings = {} } = await chrome.storage.sync.get(['links', 'settings']);
   // With Extra features off, what they set is kept but not used.
-  const detail = settings.extras ? { links, settings } : { links: links.map(({ only, all, ...link }) => link), settings: { ...settings, every: false } };
+  const detail = settings.extras ? { links, settings } : { links: links.map(({ only, all, subs, ...link }) => link), settings: { ...settings, every: false } };
   document.dispatchEvent(new CustomEvent('ahl:links', { detail: JSON.stringify(detail) }));
 };
 document.addEventListener('ahl:ready', send);

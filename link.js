@@ -22,12 +22,16 @@
   };
   // One list applies at a time. A blank Only in subreddits list means everywhere.
   const listsAllow = () => (settings.onlyOn ? !settings.only?.length || settings.only.includes(subreddit()) : !settings.skipOn || !settings.skip?.includes(subreddit()));
-  const activeLinks = () => links.filter((l) => !l.only?.length || l.only.includes(subreddit()));
+  // A link can have several names. Early versions saved them as one comma-joined string.
+  // A word's own subreddits replace its row's.
+  const activeNames = () => links.flatMap((l) => (l.names ?? l.name.split(',')).map((n) => ({ name: n.trim().replace(/\s+/g, ' '), link: l }))).filter(({ name, link }) => {
+    const list = link.subs?.[name] ?? link.only;
+    return !list?.length || list.includes(subreddit());
+  });
 
   function rules() {
-    // A link can have several names. Early versions saved them as one comma-joined string.
     // If a name is ever on two rows, the higher row wins.
-    const found = new Map(activeLinks().flatMap((l) => (l.names ?? l.name.split(',')).map((n) => [key(n), { name: n.trim().replace(/\s+/g, ' '), link: l }])).reverse());
+    const found = new Map(activeNames().map((entry) => [key(entry.name), entry]).reverse());
     found.delete('');
     const sorted = [...found.keys()].sort((a, b) => b.length - a.length); // longest name wins
     const names = sorted.map((k) => {
@@ -145,7 +149,7 @@
   }
 
   function linkBox(box) {
-    if (!box || settings.off || !listsAllow() || !activeLinks().length) return;
+    if (!box || settings.off || !listsAllow() || !activeNames().length) return;
     try {
       if (box.matches(TEXTAREA)) return linkMarkdown(box);
       // Switching to Markdown leaves mode="richText" and an empty rich editor behind, so go by what's showing.

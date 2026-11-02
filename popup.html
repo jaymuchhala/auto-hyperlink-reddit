@@ -29,7 +29,7 @@
   input[aria-invalid="true"] { border-color: #d33; }
   .row { cursor: grab; }
   .row.dragging { opacity: 0.4; }
-  .only { grid-column: 1 / -1; }
+  .only, .word-only { grid-column: 1 / -1; }
   #settings { display: grid; gap: 8px; margin-top: 8px; }
   #settings .list { display: grid; gap: 4px; }
   .names { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; min-height: 28px; }
@@ -38,6 +38,9 @@
   .chip { display: inline-flex; align-items: center; max-width: 100%; padding: 0 8px; border: 1px solid var(--line); border-radius: 999px; user-select: none; transition: margin-right 0.15s ease-out, border-color 0.15s ease-out, background-color 0.15s ease-out; }
   .chip.exact { border-color: var(--accent); }
   body.extras .chip.all { background-color: color-mix(in srgb, var(--accent) 16%, var(--bg)); }
+  /* A dotted underline means the word has its own subreddits. */
+  body.extras .chip[data-only] .word { text-decoration: underline dotted; text-underline-offset: 3px; }
+  .chip.editing { outline: 2px solid var(--accent); outline-offset: 1px; }
   /* --tools is measured on hover. */
   .chip.tight:hover, .chip.tight:has(:focus-visible) { position: relative; z-index: 2; max-width: calc(100% + var(--tools)); margin-right: calc(-1 * var(--tools)); background-color: var(--bg); }
   .tools { display: flex; flex: none; align-items: center; width: 0; overflow: hidden; transition: width 0.15s ease-out, margin 0.15s ease-out; }
@@ -101,8 +104,9 @@
   <ul class="note">
     <li>Runs when you post, comment or edit.</li>
     <li>First mention linked only.</li>
-    <li>Hover a word: Aa makes it case sensitive (border).</li>
-    <li class="extra">Hover a word: All links every mention of it (fill).</li>
+    <li>Hover a word: "Aa" makes it case sensitive.</li>
+    <li class="extra">Hover a word: "All" links every mention of it.</li>
+    <li class="extra">Hover a word: "r/" sets its own subreddits.</li>
     <li>Enter u/your-username to a skip or "Only in subreddits" list for posts on those pages.</li>
     <li>Drag a row to reorder.</li>
     <li>If link is already in post or comment, it won't add to any other words/phrases from the list.</li>

@@ -99,8 +99,8 @@ async function save() {
     // A half-typed change keeps the last good link: the menu can close at any moment.
     if (address && names.length) row.dataset.saved = address;
     // Left out when unset: all links share one storage item, with a size limit.
-    const { exact, all } = rowFlags(row);
-    const options = { ...(exact.length && { exact }), ...(all.length && { all }), ...(cleanSubs(row.querySelector('.only').value).length && { only: cleanSubs(row.querySelector('.only').value) }) };
+    const { exact, all, subs } = rowFlags(row);
+    const options = { ...(exact.length && { exact }), ...(all.length && { all }), ...(Object.keys(subs).length && { subs }), ...(cleanSubs(row.querySelector('.only').value).length && { only: cleanSubs(row.querySelector('.only').value) }) };
     if (names.length && row.dataset.saved) links.push({ names, url: row.dataset.saved, ...options });
     // A name waiting for a link, or a link for a name, stays on this computer and out of what link.js reads.
     else if (names.length || url.value.trim()) drafts.push({ names, url: url.value.trim(), ...options });
@@ -158,7 +158,8 @@ function rowNames(row) {
 function rowFlags(row) {
   const typed = cleanName(row.querySelector('.names input').value);
   const flagged = (flag) => [...row.querySelectorAll(`.chip.${flag}`)].map((c) => c.dataset.name);
-  return { exact: [...flagged('exact'), ...(typed && newWordExact() ? [typed] : [])], all: flagged('all') };
+  const subs = Object.fromEntries([...row.querySelectorAll('.chip[data-only]')].map((c) => [c.dataset.name, cleanSubs(c.dataset.only)]));
+  return { exact: [...flagged('exact'), ...(typed && newWordExact() ? [typed] : [])], all: flagged('all'), subs };
 }
 
 // A list of names, or true for all of a link's names, as exact once was for a whole row.
@@ -176,6 +177,15 @@ function flagButton(chip, flag, label, title) {
   return button;
 }
 
+// Sets a word's own subreddits, shown on the chip and its r/ button.
+function setWordSubs(chip, list) {
+  if (list.length) chip.dataset.only = list.join(', ');
+  else delete chip.dataset.only;
+  const button = chip.querySelector('.subs');
+  button.setAttribute('aria-pressed', String(list.length > 0));
+  button.title = list.length ? `Only in subreddits: ${list.join(', ')}` : 'Only in subreddits';
+}
+
 // Adds names to a row as chips, leaving out any it already has. The name box goes once there's a name.
 // from holds their exact and all lists. Without it they're new words.
 function addNames(row, names, from) {
@@ -190,6 +200,17 @@ function addNames(row, names, from) {
     chip.classList.toggle('all', Boolean(from) && listed(from.all, name));
     const every = flagButton(chip, 'all', 'All', 'Link every mention');
     every.classList.add('extra');
+    const subs = Object.assign(document.createElement('button'), { type: 'button', className: 'flag extra subs', textContent: 'r/' });
+    subs.setAttribute('aria-label', `${name}: only in subreddits`);
+    subs.addEventListener('click', () => {
+      const edit = row.querySelector('.word-only');
+      edit.chip = chip;
+      edit.value = chip.dataset.only ?? '';
+      edit.placeholder = `Only “${name}” in subreddits (blank: same as row)`;
+      edit.hidden = false;
+      chip.classList.add('editing');
+      edit.focus();
+    });
     const x = Object.assign(document.createElement('button'), { type: 'button', className: 'x', title: 'Remove' });
     x.setAttribute('aria-label', `${name}: remove`);
     // Removing a row's last name removes the row.
@@ -202,9 +223,10 @@ function addNames(row, names, from) {
       save();
     });
     const tools = Object.assign(document.createElement('span'), { className: 'tools' });
-    tools.append(flagButton(chip, 'exact', 'Aa', 'Case sensitive'), every, x);
-    const word = Object.assign(document.createElement('span'), { textContent: name });
+    tools.append(x, flagButton(chip, 'exact', 'Aa', 'Case sensitive'), every, subs);
+    const word = Object.assign(document.createElement('span'), { className: 'word', textContent: name });
     chip.append(word, tools);
+    setWordSubs(chip, from?.subs?.[name] ?? []);
     // .tight: a chip at the end of a line grows over what's next instead, since
     // wrapping would pull it out from under the pointer.
     const checkRoom = () => {
@@ -292,7 +314,20 @@ function addRow(link = { names: [], url: '' }) {
   only.setAttribute('aria-label', 'Only in these subreddits');
   only.addEventListener('input', saveSoon);
   only.addEventListener('blur', () => { only.value = cleanSubs(only.value).join(', '); });
-  row.append(names, urlInput, view, only);
+  // Opens under the names when a word's r/ is clicked.
+  const wordOnly = Object.assign(document.createElement('input'), { className: 'word-only extra', hidden: true });
+  wordOnly.setAttribute('aria-label', 'Only in these subreddits, for this word');
+  wordOnly.addEventListener('input', () => {
+    setWordSubs(wordOnly.chip, cleanSubs(wordOnly.value));
+    saveSoon();
+  });
+  const closeWordOnly = () => {
+    wordOnly.hidden = true;
+    wordOnly.chip?.classList.remove('editing');
+  };
+  wordOnly.addEventListener('blur', closeWordOnly);
+  wordOnly.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === 'Escape') closeWordOnly(); });
+  row.append(names, urlInput, view, wordOnly, only);
   rows.append(row);
   addNames(row, namesOf(link), link);
   settle();
@@ -369,7 +404,7 @@ file.addEventListener('change', async () => {
       if (row) {
         addNames(row, names, link);
       } else {
-        addRow({ names, url, exact: link.exact, all: link.all, only: link.only });
+        addRow({ names, url, exact: link.exact, all: link.all, subs: link.subs, only: link.only });
         added++;
       }
     }
