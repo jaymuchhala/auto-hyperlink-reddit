@@ -39,8 +39,7 @@
   button.add:hover, button.add:focus-visible { color: color-mix(in srgb, var(--accent) 60%, var(--fg)); background-color: color-mix(in srgb, var(--accent) 16%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 16%, transparent), 0 0 10px 3px color-mix(in srgb, var(--accent) 16%, transparent); }
   button.add:hover rect, button.add:focus-visible rect { stroke: color-mix(in srgb, var(--accent) 45%, transparent); }
   @media (prefers-reduced-motion: reduce) { button.add, button.add rect { transition: none; } }
-  #status { margin: 8px 0 0; }
-  #status:empty { margin: 0; }
+  #status { margin: 8px 0 0; min-height: 18px; }
   .note { margin: 8px 0 0; padding: 10px 0 0 16px; border-top: 1px solid var(--line); color: var(--weak); list-style: none; }
   .note li::before { content: "-"; position: absolute; margin-left: -10px; }
 </style>
