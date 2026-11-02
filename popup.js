@@ -152,7 +152,7 @@ function addRow(link = { names: [], url: '' }) {
     if (!done) return;
     anchor.href = url;
     anchor.title = url;
-    anchor.textContent = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    anchor.textContent = new URL(url).host;
   };
   urlInput.addEventListener('blur', settle);
   urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') settle(); });
