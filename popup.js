@@ -240,7 +240,8 @@ function addNames(row, names, from) {
       chip.classList.remove('closed');
     };
     chip.addEventListener('mouseenter', checkRoom);
-    chip.addEventListener('focusin', checkRoom);
+    // Pressing a toggle focuses it too, and measuring then would close the chip under the pointer.
+    chip.addEventListener('focusin', () => { if (!chip.matches(':hover')) checkRoom(); });
     input.before(chip);
   }
   input.hidden = Boolean(box.querySelector('.chip'));
