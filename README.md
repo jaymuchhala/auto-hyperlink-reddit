@@ -16,8 +16,8 @@ Titles are never changed. Neither are search boxes or any other field, including
 
 ## What it does and doesn't link
 
-- Matching ignores capitals and keeps what you typed: `mute list` stays `mute list`, as a link. A row's **Aa** button makes its word-matching case sensitive.
-- Only the first mention of each link in a post is linked, so posts don't look spammy.
+- Matching ignores capitals and keeps what you typed: `mute list` stays `mute list`, as a link. Hover a word and click **Aa** to make that word case sensitive. Its border lights up.
+- Only the first mention of each link in a post is linked, so posts don't look spammy. **All** on a word (see Extra features) changes that for that word.
 - A link can have several names, like `Mute List` and `RML`: add each with the same link and they group together. Whichever comes first in the post gets linked, and the others are left alone. Names can contain commas.
 - Each name goes to one link, and the menu won't let you use a name twice. For a second link, like a website as well as the store page, use a more specific name: `Mute List` for the store and `Mute List website` for the site.
 - Whole names only: `Mute List` won't match inside `Mute Listing`, `mute-list` or a web address.
@@ -31,8 +31,8 @@ Titles are never changed. Neither are search boxes or any other field, including
 - **Only in subreddits**: tick it and links are added only in the subreddits you list. A blank list means everywhere.
 - **Skip subreddits**: tick it and nothing is linked in the subreddits you list. It's greyed out and not used while **Only in subreddits** is ticked. List them as `pics` or `r/pics`, and your own page as `u/username`.
 - **Extra features**: off by default, and what they set is kept but not used while off.
-  - **Link every mention**: links every mention instead of only the first.
-  - **Case sensitive by default (new rows)**: new rows start with **Aa** on. Existing rows stay as they are.
+  - **All**: hover a word and click it to link every mention of that word instead of only the first. The word fills in.
+  - **Case sensitive by default (new words)**: new words start with **Aa** on. Existing words stay as they are.
   - **Only in subreddits**: limits a row to those subreddits. It's skipped everywhere else.
 
 Drag a row to reorder the list. The subreddit comes from the page's address when you submit.

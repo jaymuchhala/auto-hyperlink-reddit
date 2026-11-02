@@ -33,12 +33,11 @@ const skip = document.getElementById('skip');
 const onlyOn = document.getElementById('only-on');
 const onlyIn = document.getElementById('only-in');
 const extras = document.getElementById('extras');
-const every = document.getElementById('every');
 const exactDefault = document.getElementById('exact-default');
-const newRowExact = () => extras.checked && exactDefault.checked;
+const newWordExact = () => extras.checked && exactDefault.checked;
 
 function readSettings() {
-  return { off: !on.checked, skipOn: skipOn.checked, skip: cleanSubs(skip.value), onlyOn: onlyOn.checked, only: cleanSubs(onlyIn.value), extras: extras.checked, every: every.checked, exactDefault: exactDefault.checked };
+  return { off: !on.checked, skipOn: skipOn.checked, skip: cleanSubs(skip.value), onlyOn: onlyOn.checked, only: cleanSubs(onlyIn.value), extras: extras.checked, exactDefault: exactDefault.checked };
 }
 
 function showSettings(settings) {
@@ -48,7 +47,6 @@ function showSettings(settings) {
   onlyOn.checked = Boolean(settings.onlyOn);
   onlyIn.value = (settings.only ?? []).join(', ');
   extras.checked = Boolean(settings.extras);
-  every.checked = Boolean(settings.every);
   exactDefault.checked = Boolean(settings.exactDefault);
   showMode();
 }
@@ -56,7 +54,6 @@ function showSettings(settings) {
 function showMode() {
   document.body.classList.toggle('off', !on.checked);
   document.body.classList.toggle('extras', extras.checked);
-  document.body.classList.toggle('every', extras.checked && every.checked);
   document.body.classList.toggle('only-on', onlyOn.checked);
   // Only in subreddits overrides Skip subreddits, so Skip greys out while it's ticked.
   onlyIn.disabled = !onlyOn.checked;
@@ -65,9 +62,7 @@ function showMode() {
   skip.parentElement.title = onlyOn.checked ? 'Disable Only in subreddits to continue' : '';
 }
 
-for (const box of [on, onlyOn, skipOn, extras, every, exactDefault]) box.addEventListener('change', () => { showMode(); save(); });
-// The empty row waiting to be filled in counts as new.
-for (const box of [extras, exactDefault]) box.addEventListener('change', () => { const row = emptyRow(); if (row) row.querySelector('.exact input').checked = newRowExact(); });
+for (const box of [on, onlyOn, skipOn, extras, exactDefault]) box.addEventListener('change', () => { showMode(); save(); });
 for (const list of [skip, onlyIn]) {
   list.addEventListener('input', saveSoon);
   list.addEventListener('blur', () => { list.value = cleanSubs(list.value).join(', '); });
@@ -104,7 +99,8 @@ async function save() {
     // A half-typed change keeps the last good link: the menu can close at any moment.
     if (address && names.length) row.dataset.saved = address;
     // Left out when unset: all links share one storage item, with a size limit.
-    const options = { ...(row.querySelector('.exact input').checked && { exact: true }), ...(cleanSubs(row.querySelector('.only').value).length && { only: cleanSubs(row.querySelector('.only').value) }) };
+    const { exact, all } = rowFlags(row);
+    const options = { ...(exact.length && { exact }), ...(all.length && { all }), ...(cleanSubs(row.querySelector('.only').value).length && { only: cleanSubs(row.querySelector('.only').value) }) };
     if (names.length && row.dataset.saved) links.push({ names, url: row.dataset.saved, ...options });
     // A name waiting for a link, or a link for a name, stays on this computer and out of what link.js reads.
     else if (names.length || url.value.trim()) drafts.push({ names, url: url.value.trim(), ...options });
@@ -158,20 +154,46 @@ function rowNames(row) {
   return [...row.querySelectorAll('.chip')].map((c) => c.dataset.name).concat(typed ? [typed] : []);
 }
 
+// Which of a row's names have each setting. What's typed but not a chip yet counts as a new word.
+function rowFlags(row) {
+  const typed = cleanName(row.querySelector('.names input').value);
+  const flagged = (flag) => [...row.querySelectorAll(`.chip.${flag}`)].map((c) => c.dataset.name);
+  return { exact: [...flagged('exact'), ...(typed && newWordExact() ? [typed] : [])], all: flagged('all') };
+}
+
+// A list of names, or true for all of a link's names, as exact once was for a whole row.
+const listed = (list, name) => list === true || (Array.isArray(list) && list.includes(name));
+
+// One of a chip's toggles, which turns a class on the chip on or off.
+function flagButton(chip, flag, label, title) {
+  const button = Object.assign(document.createElement('button'), { type: 'button', className: 'flag', textContent: label, title });
+  button.setAttribute('aria-label', `${chip.dataset.name}: ${title}`);
+  button.setAttribute('aria-pressed', String(chip.classList.contains(flag)));
+  button.addEventListener('click', () => {
+    button.setAttribute('aria-pressed', String(chip.classList.toggle(flag)));
+    save();
+  });
+  return button;
+}
+
 // Adds names to a row as chips, leaving out any it already has. The name box goes once there's a name.
-function addNames(row, names) {
+// from holds their exact and all lists. Without it they're new words.
+function addNames(row, names, from) {
   const box = row.querySelector('.names');
   const input = box.querySelector('input');
   for (const name of names) {
     const have = [...box.querySelectorAll('.chip')].some((c) => c.dataset.name.toLowerCase() === name.toLowerCase());
     if (have) continue;
-    const chip = Object.assign(document.createElement('button'), { type: 'button', className: 'chip' });
+    const chip = Object.assign(document.createElement('span'), { className: 'chip' });
     chip.dataset.name = name;
-    chip.setAttribute('aria-label', `${name}: remove`);
-    const x = Object.assign(document.createElement('span'), { className: 'x' });
-    chip.append(name, x);
-    // A chip removes itself on click. Removing a row's last name removes the row.
-    chip.addEventListener('click', () => {
+    chip.classList.toggle('exact', from ? listed(from.exact, name) : newWordExact());
+    chip.classList.toggle('all', Boolean(from) && listed(from.all, name));
+    const every = flagButton(chip, 'all', 'All', 'Link every mention');
+    every.classList.add('extra');
+    const x = Object.assign(document.createElement('button'), { type: 'button', className: 'x', title: 'Remove' });
+    x.setAttribute('aria-label', `${name}: remove`);
+    // Removing a row's last name removes the row.
+    x.addEventListener('click', () => {
       chip.remove();
       if (!box.querySelector('.chip')) {
         row.remove();
@@ -179,17 +201,28 @@ function addNames(row, names) {
       }
       save();
     });
-    // .tight: a chip at the end of a line grows into its margin instead, since
+    const tools = Object.assign(document.createElement('span'), { className: 'tools' });
+    tools.append(flagButton(chip, 'exact', 'Aa', 'Case sensitive'), every, x);
+    const word = Object.assign(document.createElement('span'), { textContent: name });
+    chip.append(word, tools);
+    // .tight: a chip at the end of a line grows over what's next instead, since
     // wrapping would pull it out from under the pointer.
-    const checkRoom = () => chip.classList.toggle('tight', chip.getBoundingClientRect().right + 16 > box.getBoundingClientRect().right);
+    const checkRoom = () => {
+      chip.style.setProperty('--tools', `${tools.scrollWidth}px`);
+      // The name's one-line width, since a chip already grown to the edge wraps it. 9 is the chip's padding and border.
+      word.style.whiteSpace = 'nowrap';
+      const needed = word.getBoundingClientRect().left + word.scrollWidth + tools.scrollWidth + 9;
+      word.style.whiteSpace = '';
+      chip.classList.toggle('tight', needed > box.getBoundingClientRect().right);
+    };
     chip.addEventListener('mouseenter', checkRoom);
-    chip.addEventListener('focus', checkRoom);
+    chip.addEventListener('focusin', checkRoom);
     input.before(chip);
   }
   input.hidden = Boolean(box.querySelector('.chip'));
 }
 
-function addRow(link = { names: [], url: '', exact: newRowExact() }) {
+function addRow(link = { names: [], url: '' }) {
   const row = document.createElement('div');
   row.className = 'row';
   row.draggable = true;
@@ -243,7 +276,7 @@ function addRow(link = { names: [], url: '', exact: newRowExact() }) {
     const same = done && [...rows.children].find((r) => r !== row && rowNames(r).length && cleanUrl(r.querySelectorAll('input')[1].value) === url);
     if (same) {
       merged = true;
-      addNames(same, rowNames(row));
+      addNames(same, rowNames(row), rowFlags(row));
       row.remove();
       saveSoon();
       return;
@@ -255,18 +288,13 @@ function addRow(link = { names: [], url: '', exact: newRowExact() }) {
   };
   urlInput.addEventListener('blur', settle);
   urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') settle(); });
-  const exact = Object.assign(document.createElement('label'), { className: 'check exact', title: 'Make the word-matching case sensitive' });
-  const exactBox = Object.assign(document.createElement('input'), { type: 'checkbox', checked: Boolean(link.exact) });
-  exactBox.setAttribute('aria-label', 'Make the word-matching case sensitive');
-  exactBox.addEventListener('change', () => save());
-  exact.append(exactBox, Object.assign(document.createElement('span'), { textContent: 'Aa' }));
   const only = Object.assign(document.createElement('input'), { className: 'only extra', placeholder: 'Only in subreddits (blank: all)', value: (link.only ?? []).join(', ') });
   only.setAttribute('aria-label', 'Only in these subreddits');
   only.addEventListener('input', saveSoon);
   only.addEventListener('blur', () => { only.value = cleanSubs(only.value).join(', '); });
-  row.append(names, urlInput, view, exact, only);
+  row.append(names, urlInput, view, only);
   rows.append(row);
-  addNames(row, namesOf(link));
+  addNames(row, namesOf(link), link);
   settle();
   return row;
 }
@@ -275,7 +303,7 @@ function addRow(link = { names: [], url: '', exact: newRowExact() }) {
 let dragged = null;
 rows.addEventListener('mousedown', (e) => {
   const row = e.target.closest('.row');
-  if (row) row.draggable = !e.target.matches('input:not([type="checkbox"])');
+  if (row) row.draggable = !e.target.matches('input');
 });
 rows.addEventListener('dragstart', (e) => {
   dragged = e.target.closest('.row');
@@ -339,9 +367,9 @@ file.addEventListener('change', async () => {
       skipped += taken.length;
       if (!names.length) continue;
       if (row) {
-        addNames(row, names);
+        addNames(row, names, link);
       } else {
-        addRow({ names, url, exact: link.exact, only: link.only });
+        addRow({ names, url, exact: link.exact, all: link.all, only: link.only });
         added++;
       }
     }
@@ -379,7 +407,9 @@ async function load() {
   const [{ links = [], settings = {} }, { drafts = [] }] = await Promise.all([chrome.storage.sync.get(['links', 'settings']), chrome.storage.local.get('drafts')]);
   showSettings(settings);
   lastSettings = JSON.stringify(settings);
-  render(links, drafts);
+  // Link every mention was once one switch for all words. The next save stores it word by word.
+  const perWord = (link) => (settings.every ? { ...link, all: true } : link);
+  render(links.map(perWord), drafts.map(perWord));
 }
 
 // Opens ready to finish the first row that's missing its name or its link.

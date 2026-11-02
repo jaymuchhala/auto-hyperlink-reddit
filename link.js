@@ -32,12 +32,15 @@
     const sorted = [...found.keys()].sort((a, b) => b.length - a.length); // longest name wins
     const names = sorted.map((k) => {
       const { name, link } = found.get(k);
-      const source = (link.exact ? name : k).replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '[^\\S\\n]+'); // a name stays on one line
-      return link.exact ? `(?-i:${source})` : source;
+      // exact was once true for all of a link's names.
+      const exact = link.exact === true || link.exact?.includes(name);
+      const source = (exact ? name : k).replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '[^\\S\\n]+'); // a name stays on one line
+      return exact ? `(?-i:${source})` : source;
     });
     return {
       source: `(?<![${WORD}/.@#-])(?:${names.join('|')})(?![${WORD}]|[-./][\\p{L}\\p{N}])`,
       urls: new Map([...found].map(([k, { link }]) => [k, link.url])),
+      every: new Set([...found].filter(([, { name, link }]) => link.all?.includes(name)).map(([k]) => k)), // names linked every time
       done: new Set(), // addresses to leave alone: each is linked once per post
     };
   }
@@ -46,7 +49,7 @@
   // Unicode case rules can match text key() doesn't map to a name (Greek final sigma), which also gives null.
   function claim(name, r) {
     const url = r.urls.get(key(name));
-    if (url && settings.every) return url;
+    if (url && (settings.every || r.every.has(key(name)))) return url;
     if (!url || r.done.has(sameUrl(url))) return null;
     r.done.add(sameUrl(url));
     return url;

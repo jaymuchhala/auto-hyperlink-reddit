@@ -12,7 +12,7 @@
   .check { display: flex; align-items: center; gap: 6px; cursor: pointer; }
   input[type="checkbox"] { margin: 0; padding: 0; accent-color: var(--accent); }
   body.off #rows, body.off #settings { opacity: 0.5; }
-  body:not(.extras) .extra, body.every .first-only { display: none !important; }
+  body:not(.extras) .extra { display: none !important; }
   body.only-on .skip-list { opacity: 0.5; }
   h1 { font-size: 15px; margin: 0; }
   p { margin: 0 0 12px; color: var(--weak); }
@@ -23,18 +23,10 @@
   #rows::-webkit-scrollbar-thumb { border-radius: 2px; background: var(--line); }
   /* The row being added stays below the list. The scrollbar ends above it. */
   #rows:has(> .row:last-child > .link-view[hidden])::-webkit-scrollbar-track { margin-bottom: 44px; }
-  .row { display: grid; grid-template-columns: 1fr 1fr auto; align-items: start; gap: 6px; margin-bottom: 6px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 6px; margin-bottom: 6px; }
   .row:last-child:has(> .link-view[hidden]) { position: sticky; z-index: 1; bottom: 6px; background: var(--bg); box-shadow: 0 0 0 6px var(--bg); }
   input { min-width: 0; padding: 5px 7px; border: 1px solid var(--line); border-radius: 5px; background: transparent; color: inherit; font: inherit; }
   input[aria-invalid="true"] { border-color: #d33; }
-  /* Case sensitive toggle: only the text changes, lit in the accent when on and faint when off. */
-  .exact { position: relative; min-height: 28px; }
-  .exact input { position: absolute; opacity: 0; pointer-events: none; }
-  .exact span { width: 26px; line-height: 22px; border-radius: 5px; color: color-mix(in srgb, var(--weak) 55%, var(--bg)); font-size: 13px; text-align: center; transition: color 0.15s ease-out; }
-  .exact:hover span { color: var(--fg); }
-  .exact input:checked + span { color: var(--accent); }
-  .exact input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
-  @media (prefers-reduced-motion: reduce) { .exact span { transition: none; } }
   .row { cursor: grab; }
   .row.dragging { opacity: 0.4; }
   .only { grid-column: 1 / -1; }
@@ -42,16 +34,25 @@
   #settings .list { display: grid; gap: 4px; }
   .names { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; min-height: 28px; }
   .names input { flex: 1; width: 0; }
-  /* A chip removes itself on click. On hover it grows, pushing what's after it along, while its × stretches out. */
-  .chip { display: inline-flex; align-items: center; max-width: 100%; padding: 0 8px; border-radius: 999px; transition: margin-right 0.15s ease-out; }
-  .chip.tight:hover, .chip.tight:focus-visible { margin-right: -6px; }
-  .chip .x { position: relative; width: 0; height: 11px; color: var(--danger); transition: width 0.15s ease-out, margin 0.15s ease-out; }
-  .chip:hover .x, .chip:focus-visible .x { width: 11px; margin: 0 -4px 0 3px; }
+  /* A chip's border means case sensitive and its fill means every mention. On hover it grows, pushing what's after it along, while its toggles and × stretch out. */
+  .chip { display: inline-flex; align-items: center; max-width: 100%; padding: 0 8px; border: 1px solid var(--line); border-radius: 999px; user-select: none; transition: margin-right 0.15s ease-out, border-color 0.15s ease-out, background-color 0.15s ease-out; }
+  .chip.exact { border-color: var(--accent); }
+  body.extras .chip.all { background-color: color-mix(in srgb, var(--accent) 16%, var(--bg)); }
+  /* --tools is measured on hover. */
+  .chip.tight:hover, .chip.tight:has(:focus-visible) { position: relative; z-index: 2; max-width: calc(100% + var(--tools)); margin-right: calc(-1 * var(--tools)); background-color: var(--bg); }
+  .tools { display: flex; flex: none; align-items: center; width: 0; overflow: hidden; transition: width 0.15s ease-out, margin 0.15s ease-out; }
+  .chip:hover .tools, .chip:has(:focus-visible) .tools { width: var(--tools); margin: 0 -4px 0 4px; }
+  /* Only the text changes, lit in the accent when on and faint when off. */
+  .flag { flex: none; padding: 0 2px; border: 0; border-radius: 3px; color: color-mix(in srgb, var(--weak) 55%, var(--bg)); transition: color 0.15s ease-out; }
+  .flag:hover { color: var(--fg); }
+  .flag[aria-pressed="true"] { color: var(--accent); }
+  .flag:focus-visible, .chip .x:focus-visible { outline: 1px solid var(--accent); outline-offset: -1px; }
+  .chip .x { position: relative; flex: none; width: 15px; height: 16px; padding: 0; border: 0; color: var(--danger); }
   .chip .x::before, .chip .x::after { content: ""; position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; opacity: 0; border-radius: 2px; background: currentColor; transform: translate(-50%, -50%); transition: width 0.15s ease-out, height 0.15s ease-out, transform 0.15s ease-out, opacity 0.08s; }
-  .chip:hover .x::before, .chip:focus-visible .x::before, .chip:hover .x::after, .chip:focus-visible .x::after { width: 8px; height: 1.25px; opacity: 1; }
-  .chip:hover .x::before, .chip:focus-visible .x::before { transform: translate(-50%, -50%) rotate(45deg); }
-  .chip:hover .x::after, .chip:focus-visible .x::after { transform: translate(-50%, -50%) rotate(-45deg); }
-  @media (prefers-reduced-motion: reduce) { .chip, .chip .x, .chip .x::before, .chip .x::after { transition: none; } }
+  .chip:hover .x::before, .chip:has(:focus-visible) .x::before, .chip:hover .x::after, .chip:has(:focus-visible) .x::after { width: 8px; height: 1.25px; opacity: 1; }
+  .chip:hover .x::before, .chip:has(:focus-visible) .x::before { transform: translate(-50%, -50%) rotate(45deg); }
+  .chip:hover .x::after, .chip:has(:focus-visible) .x::after { transform: translate(-50%, -50%) rotate(-45deg); }
+  @media (prefers-reduced-motion: reduce) { .chip, .tools, .flag, .chip .x::before, .chip .x::after { transition: none; } }
   .link-view { display: flex; align-items: center; gap: 4px; min-width: 0; min-height: 28px; }
   .link-view[hidden] { display: none; }
   .link-view a { overflow: hidden; color: var(--accent); text-overflow: ellipsis; white-space: nowrap; }
@@ -95,16 +96,16 @@
       <input id="skip" aria-label="Skip these subreddits" placeholder="pics, askreddit, u/username">
     </div>
     <label class="check"><input type="checkbox" id="extras"> Extra features</label>
-    <label class="check extra"><input type="checkbox" id="every"> Link every mention</label>
-    <label class="check extra"><input type="checkbox" id="exact-default"> Case sensitive by default (new rows)</label>
+    <label class="check extra"><input type="checkbox" id="exact-default"> Case sensitive by default (new words)</label>
   </div>
   <ul class="note">
     <li>Runs when you post, comment or edit.</li>
-    <li class="first-only">First mention linked only.</li>
-    <li>Aa makes the word-matching case sensitive.</li>
+    <li>First mention linked only.</li>
+    <li>Hover a word: Aa makes it case sensitive (border).</li>
+    <li class="extra">Hover a word: All links every mention of it (fill).</li>
     <li>Enter u/your-username to a skip or "Only in subreddits" list for posts on those pages.</li>
     <li>Drag a row to reorder.</li>
-    <li class="first-only">If link is already in post or comment, it won't add to any other words/phrases from the list.</li>
+    <li>If link is already in post or comment, it won't add to any other words/phrases from the list.</li>
     <li>New entries apply to open/loaded tabs as well.</li>
     <li class="backup"><button id="backup" type="button">Back up</button> and <button id="restore" type="button">restore</button><input id="file" type="file" accept=".json,application/json" hidden></li>
   </ul>
