@@ -34,8 +34,8 @@
   .backup button { padding: 4px 10px; }
   button { font: inherit; color: inherit; background: transparent; border: 1px solid var(--line); border-radius: 5px; cursor: pointer; }
   /* The + is drawn, since a text + sits off-centre in its box. */
-  button.add { position: relative; flex: none; width: 34px; height: 34px; padding: 0; color: var(--accent); border-color: var(--accent); transition: background-color 0.15s ease-out, box-shadow 0.15s ease-out; }
-  button.add:hover, button.add:focus-visible { background-color: color-mix(in srgb, var(--accent) 16%, transparent); box-shadow: 0 0 10px 3px color-mix(in srgb, var(--accent) 16%, transparent); }
+  button.add { position: relative; flex: none; width: 34px; height: 34px; padding: 0; color: var(--accent); border-color: var(--accent); transition: background-color 0.15s ease-out, box-shadow 0.15s ease-out, border-color 0.15s ease-out; }
+  button.add:hover, button.add:focus-visible { border-color: transparent; background-color: color-mix(in srgb, var(--accent) 16%, transparent); box-shadow: 0 0 10px 3px color-mix(in srgb, var(--accent) 16%, transparent); }
   @media (prefers-reduced-motion: reduce) { button.add { transition: none; } }
   button.add::before, button.add::after { content: ""; position: absolute; top: 50%; left: 50%; width: 14px; height: 2px; border-radius: 1px; background: currentColor; transform: translate(-50%, -50%); }
   button.add::after { transform: translate(-50%, -50%) rotate(90deg); }
