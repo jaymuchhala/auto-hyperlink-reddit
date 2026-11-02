@@ -22,7 +22,7 @@ Titles are never changed. Neither are search boxes or any other field, including
 - Each name goes to one link, and the menu won't let you use a name twice. For a second link, like a website as well as the store page, use a more specific name: `Mute List` for the store and `Mute List website` for the site.
 - Whole names only: `Mute List` won't match inside `Mute Listing`, `mute-list` or a web address.
 - Longer names win: `Mute List Pro` beats `Mute List`.
-- Text that's already a link, and code, are left alone. If you've linked a name or its address yourself, it isn't linked again.
+- Text that's already a link, and code, are left alone. If you've linked a name or its address yourself, or written the address out (`https://`, `www.` or neither), it isn't linked again.
 - A name split across formatting (half bold, for example) won't match.
 
 ## Your data

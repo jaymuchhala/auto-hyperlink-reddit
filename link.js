@@ -10,7 +10,7 @@
 
   const key = (name) => name.trim().replace(/\s+/g, ' ').toLowerCase();
   // One address, however it's written: scheme, www, capitals, trailing slash, escaped brackets.
-  const sameUrl = (url) => url.toLowerCase().replace(/^https?:\/\/(?:www\.)?/, '').replace(/%28/g, '(').replace(/%29/g, ')').replace(/\/+$/, '');
+  const sameUrl = (url) => url.toLowerCase().replace(/^(?:https?:\/\/)?(?:www\.)?/, '').replace(/%28/g, '(').replace(/%29/g, ')').replace(/\/+$/, '');
   // Left alone in both kinds of box: links written out as text, and web addresses with or without a scheme.
   const LINKISH = '!?\\[[^\\]]*\\]\\([^)]*\\)|\\[[^\\]]*\\]\\[[^\\]]*\\]|(?:https?://|www\\.)\\S+|[\\p{L}\\p{N}-]+(?:\\.[\\p{L}\\p{N}-]+)+/\\S*';
 
@@ -41,10 +41,14 @@
     for (const m of text.matchAll(new RegExp(r.source, 'giu'))) claim(m[0], r);
   }
 
-  // An address written out in the text counts as linked. A closing bracket may be part of it or not, so both go in.
+  // An address written out in the text counts as linked, with or without a scheme. A closing bracket may be part of it
+  // or not, so both go in. Text that's itself a name (Tab.io) is the name, so it can still be linked.
   function seedAddresses(text, r) {
-    for (const [address] of text.matchAll(/(?:https?:\/\/|www\.)[^\s<>[\]]+/gi)) {
-      for (const end of [/[.,;:!?'"]+$/, /[).,;:!?'"]+$/]) r.done.add(sameUrl(address.replace(end, '')));
+    for (const [address] of text.matchAll(/(?:https?:\/\/|www\.)[^\s<>[\]]+|(?<![\p{L}\p{N}_@\/.-])[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)+(?:[/?#][^\s<>[\]]*)?/giu)) {
+      for (const end of [/[.,;:!?'"]+$/, /[).,;:!?'"]+$/]) {
+        const written = address.replace(end, '');
+        if (!r.urls.has(key(written))) r.done.add(sameUrl(written));
+      }
     }
   }
 
