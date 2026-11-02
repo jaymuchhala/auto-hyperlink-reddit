@@ -1,4 +1,4 @@
-# Auto Hyperlink for Reddit (Beta)
+# Auto Hyperlink for Reddit
 
 Type as normal on Reddit. When you press **Post**, **Comment**, **Reply** or **Save**, names you've chosen (your Chrome extensions, for example) become links.
 

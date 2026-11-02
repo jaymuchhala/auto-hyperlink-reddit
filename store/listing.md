@@ -12,7 +12,7 @@ Paste these into the Developer Dashboard.
 
 Mention the same tools or Chrome extensions on Reddit a lot? Type as normal, and they become links when you press Post or Comment.
 
-BETA: Reddit changes its pages often. If something stops linking, please open an issue on GitHub.
+Reddit changes its pages often. If something stops linking, please open an issue on GitHub.
 
 How it works
 - Add names and their links in the extension's toolbar menu.
