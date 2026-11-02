@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Auto Hyperlink for Reddit (Beta)",
   "version": "0.1.1",
-  "description": "Turn text you choose into links in your Reddit posts and comments, at the moment you submit.",
+  "description": "Make text into hyperlink automatically when posting or commenting on Reddit.",
   "homepage_url": "https://github.com/jaymuchhala/auto-hyperlink-reddit",
   "permissions": ["storage"],
   "background": { "service_worker": "background.js" },
