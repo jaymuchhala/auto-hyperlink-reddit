@@ -27,12 +27,12 @@
   .row:last-child:has(> .link-view[hidden]) { position: sticky; z-index: 1; bottom: 6px; background: var(--bg); box-shadow: 0 0 0 6px var(--bg); }
   input { min-width: 0; padding: 5px 7px; border: 1px solid var(--line); border-radius: 5px; background: transparent; color: inherit; font: inherit; }
   input[aria-invalid="true"] { border-color: #d33; }
-  /* Case sensitive toggle: lit in the accent when on, faint and unboxed when off. */
+  /* Case sensitive toggle: only the text changes, lit in the accent when on and faint when off. */
   .exact { position: relative; min-height: 28px; }
   .exact input { position: absolute; opacity: 0; pointer-events: none; }
-  .exact span { width: 26px; line-height: 22px; border: 1px solid transparent; border-radius: 5px; color: color-mix(in srgb, var(--weak) 55%, var(--bg)); font-size: 12px; text-align: center; transition: background-color 0.15s ease-out, border-color 0.15s ease-out, color 0.15s ease-out; }
+  .exact span { width: 26px; line-height: 22px; border-radius: 5px; color: color-mix(in srgb, var(--weak) 55%, var(--bg)); font-size: 12px; text-align: center; transition: color 0.15s ease-out; }
   .exact:hover span { color: var(--fg); }
-  .exact input:checked + span { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); font-weight: 600; }
+  .exact input:checked + span { color: var(--accent); font-weight: 600; }
   .exact input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
   @media (prefers-reduced-motion: reduce) { .exact span { transition: none; } }
   .row { cursor: grab; }
