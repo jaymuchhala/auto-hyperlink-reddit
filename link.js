@@ -9,19 +9,22 @@
   let links = [];
 
   const key = (name) => name.trim().replace(/\s+/g, ' ').toLowerCase();
+  const sameUrl = (url) => url.replace(/\/+$/, '').toLowerCase();
 
   function rules() {
-    const sorted = [...links].sort((a, b) => b.name.length - a.name.length); // longest name wins
-    const names = sorted.map((l) => key(l.name).replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '\\s+'));
+    // A row's name can hold several names for one link, separated by commas.
+    const urls = new Map(links.flatMap((l) => l.name.split(',').map((n) => [key(n), l.url])));
+    const sorted = [...urls.keys()].sort((a, b) => b.length - a.length); // longest name wins
+    const names = sorted.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '\\s+'));
     return {
       source: `(?<![${WORD}/.@#-])(?:${names.join('|')})(?![${WORD}]|[-./][\\p{L}\\p{N}])`,
-      urls: new Map(links.map((l) => [key(l.name), l.url])),
-      done: new Set(), // names to leave alone: each is linked once per post
+      urls,
+      done: new Set(), // addresses to leave alone: each is linked once per post
     };
   }
 
   function seedLinked(text, r) {
-    for (const m of text.matchAll(new RegExp(r.source, 'giu'))) r.done.add(key(m[0]));
+    for (const m of text.matchAll(new RegExp(r.source, 'giu'))) r.done.add(sameUrl(r.urls.get(key(m[0]))));
   }
 
   // Rich text: Reddit's Lexical editor. Its own node methods do the edit, and
@@ -35,7 +38,10 @@
       const texts = [];
       const walk = (node) => {
         const type = node.getType();
-        if (node.getURL) return seedLinked(node.getTextContent(), r);
+        if (node.getURL) {
+          r.done.add(sameUrl(node.getURL()));
+          return seedLinked(node.getTextContent(), r);
+        }
         if (type === 'code') return;
         if (type === 'text' && !node.hasFormat('code')) texts.push(node);
         if (node.getChildren) node.getChildren().forEach(walk);
@@ -44,10 +50,10 @@
       for (const node of texts) {
         const hits = [];
         for (const m of node.getTextContent().matchAll(new RegExp(r.source, 'giu'))) {
-          const name = key(m[0]);
-          if (r.done.has(name)) continue;
-          r.done.add(name);
-          hits.push({ start: m.index, end: m.index + m[0].length, url: r.urls.get(name) });
+          const url = r.urls.get(key(m[0]));
+          if (r.done.has(sameUrl(url))) continue;
+          r.done.add(sameUrl(url));
+          hits.push({ start: m.index, end: m.index + m[0].length, url });
         }
         if (!hits.length) continue;
         let pos = 0;
@@ -67,12 +73,15 @@
   function linkMarkdown(box) {
     const r = rules();
     for (const m of box.value.matchAll(/\[([^\]]*)\]\(/g)) seedLinked(m[1], r);
+    const text = box.value.toLowerCase();
+    for (const url of r.urls.values()) if (text.includes(sameUrl(url))) r.done.add(sameUrl(url));
     const skip = '```[\\s\\S]*?```|`[^`\\n]*`|^(?: {4}|\\t).*$|!?\\[[^\\]]*\\]\\([^)]*\\)|https?://\\S+';
     const next = box.value.replace(new RegExp(`(${skip})|${r.source}`, 'gimu'), (m, skipped) => {
-      const name = key(m);
-      if (skipped || r.done.has(name)) return m;
-      r.done.add(name);
-      const url = r.urls.get(name).replace(/[()]/g, (c) => `%${c.charCodeAt(0).toString(16)}`);
+      if (skipped) return m;
+      const target = r.urls.get(key(m));
+      if (r.done.has(sameUrl(target))) return m;
+      r.done.add(sameUrl(target));
+      const url = target.replace(/[()]/g, (c) => `%${c.charCodeAt(0).toString(16)}`);
       return `[${m.replace(/[[\]]/g, '\\$&')}](${url})`;
     });
     if (next === box.value) return;

@@ -17,12 +17,13 @@ BETA: Reddit changes its pages often. If something stops linking, please open an
 How it works
 - Add names and their links in the extension's toolbar menu.
 - Write your post or comment as usual.
-- When you press Post, Comment, Reply or Save, the first mention of each name becomes a link.
+- When you press Post, Comment, Reply or Save, the first mention of each link's name becomes a link.
 
 Details
 - Works in rich text and Markdown, in comments, replies, edits and post bodies, on new and old Reddit.
 - Never touches titles, or text that's already a link or code.
 - Matches whole names only and ignores capitals.
+- Give one link several names, and back up or restore your list.
 
 Light and private
 - Runs only when you submit. Nothing runs while you read or type.

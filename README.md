@@ -17,11 +17,16 @@ Titles are never changed. Neither are search boxes or any other field, including
 ## What it does and doesn't link
 
 - Matching ignores capitals and keeps what you typed: `mute list` stays `mute list`, as a link.
-- Only the first mention of each name in a post is linked, so posts don't look spammy.
+- Only the first mention of each link in a post is linked, so posts don't look spammy.
+- A link can have several names, separated by commas: `Mute List, RML`. Whichever comes first gets linked, and the others are left alone.
 - Whole names only: `Mute List` won't match inside `Mute Listing`, `mute-list` or a web address.
 - Longer names win: `Mute List Pro` beats `Mute List`.
-- Text that's already a link, and code, are left alone. A name that's already linked isn't linked again.
+- Text that's already a link, and code, are left alone. If you've linked a name or its address yourself, it isn't linked again.
 - A name split across formatting (half bold, for example) won't match.
+
+## Your data
+
+Names and links save as you type, in Chrome's extension storage, and sync between your browsers if Chrome sync is on. There's room for roughly 80 links. Uninstalling removes them, so use **Back up** in the menu to save them to a file. **Restore** adds a backup to your current list and never removes anything.
 
 ## Light by design
 

@@ -4,26 +4,49 @@
 <meta charset="utf-8">
 <title>Auto Hyperlink for Reddit</title>
 <style>
-  :root { color-scheme: light dark; --bg: #fff; --fg: #1c1c1c; --weak: #666; --line: #d6d6d6; --accent: #0b6bcb; }
-  @media (prefers-color-scheme: dark) { :root { --bg: #1b1b1b; --fg: #eee; --weak: #a5a5a5; --line: #444; --accent: #6db3f8; } }
+  :root { color-scheme: light dark; --bg: #fff; --fg: #1c1c1c; --weak: #666; --line: #d6d6d6; --accent: #0b6bcb; --danger: #d33; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #1b1b1b; --fg: #eee; --weak: #a5a5a5; --line: #444; --accent: #6db3f8; --danger: #ff6b6b; } }
   body { width: 400px; margin: 0; padding: 14px; background: var(--bg); color: var(--fg); font: 13px/1.4 system-ui, sans-serif; }
-  h1 { font-size: 15px; margin: 0 0 10px; }
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  h1 { font-size: 15px; margin: 0; }
   p { margin: 0 0 12px; color: var(--weak); }
-  .row { display: grid; grid-template-columns: 1fr 1.4fr 26px; gap: 6px; margin-bottom: 6px; }
+  .row { display: grid; grid-template-columns: 1.2fr 1.2fr 26px; align-items: start; gap: 6px; margin-bottom: 6px; }
   input { min-width: 0; padding: 5px 7px; border: 1px solid var(--line); border-radius: 5px; background: transparent; color: inherit; font: inherit; }
   input[aria-invalid="true"] { border-color: #d33; }
+  .names { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; padding: 3px 4px; border: 1px solid var(--line); border-radius: 5px; cursor: text; }
+  .names input { flex: 1; width: 0; min-width: 70px; padding: 1px 3px; border: 0; outline: 0; }
+  /* A chip removes itself on click. On hover it grows, pushing what's after it along, while its × stretches out. */
+  .chip { display: inline-flex; align-items: center; max-width: 100%; padding: 0 8px; border-radius: 999px; transition: margin-right 0.15s ease-out; }
+  .chip.tight:hover, .chip.tight:focus-visible { margin-right: -6px; }
+  .chip .x { position: relative; width: 0; height: 11px; color: var(--danger); transition: width 0.15s ease-out, margin 0.15s ease-out; }
+  .chip:hover .x, .chip:focus-visible .x { width: 11px; margin: 0 -4px 0 3px; }
+  .chip .x::before, .chip .x::after { content: ""; position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; opacity: 0; border-radius: 2px; background: currentColor; transform: translate(-50%, -50%); transition: width 0.15s ease-out, height 0.15s ease-out, transform 0.15s ease-out, opacity 0.08s; }
+  .chip:hover .x::before, .chip:focus-visible .x::before, .chip:hover .x::after, .chip:focus-visible .x::after { width: 8px; height: 1.25px; opacity: 1; }
+  .chip:hover .x::before, .chip:focus-visible .x::before { transform: translate(-50%, -50%) rotate(45deg); }
+  .chip:hover .x::after, .chip:focus-visible .x::after { transform: translate(-50%, -50%) rotate(-45deg); }
+  @media (prefers-reduced-motion: reduce) { .chip, .chip .x, .chip .x::before, .chip .x::after { transition: none; } }
+  .open { display: flex; height: 28px; align-items: center; justify-content: center; color: var(--accent); text-decoration: none; border: 1px solid var(--line); border-radius: 5px; }
+  .backup { display: flex; gap: 6px; margin-top: 10px; }
+  .backup button { padding: 4px 10px; }
   button { font: inherit; color: inherit; background: transparent; border: 1px solid var(--line); border-radius: 5px; cursor: pointer; }
-  button.add { margin-top: 2px; padding: 5px 10px; color: var(--accent); border-color: var(--accent); }
+  button.add { width: 26px; height: 26px; padding: 0; font-size: 18px; line-height: 1; color: var(--accent); border-color: var(--accent); }
   #status { margin: 8px 0 0; min-height: 18px; }
   .note { margin: 8px 0 0; padding-top: 10px; border-top: 1px solid var(--line); }
 </style>
 </head>
 <body>
-  <h1>Auto Hyperlink for Reddit</h1>
+  <header>
+    <h1>Auto Hyperlink for Reddit</h1>
+    <button class="add" id="add" type="button" title="Add a name" aria-label="Add a name">+</button>
+  </header>
   <div id="rows"></div>
-  <button class="add" id="add" type="button">Add a name</button>
   <p id="status" role="status"></p>
-  <p class="note">Runs when you post or comment (including edits).<br>First mention linked, not any others so it isn't spammy. If you already link it yourself, the extension doesn't add any.</p>
+  <p class="note">Runs when you post or comment (including edits).<br>First mention linked, not any others so it isn't spammy. If you already link it yourself, the extension doesn't add any.<br>Commas separate other names for the same link; only one of them gets linked.</p>
+  <div class="backup">
+    <button id="backup" type="button">Back up</button>
+    <button id="restore" type="button">Restore</button>
+    <input id="file" type="file" accept=".json,application/json" hidden>
+  </div>
   <script src="popup.js"></script>
 </body>
 </html>
