@@ -25,7 +25,7 @@ Titles are never changed. Neither are search boxes or any other field, including
 
 ## Light by design
 
-There's no background worker, typing listener, page observer, timer or network request. The code runs when a submit button is clicked or Cmd/Ctrl+Enter is pressed, and only reads the box you're sending. See [PRIVACY.md](PRIVACY.md).
+There's no typing listener, page observer, timer or network request. The code runs when a submit button is clicked or Cmd/Ctrl+Enter is pressed, and only reads the box you're sending. The small background worker exists only for the development reload below and stays idle in store installs. See [PRIVACY.md](PRIVACY.md).
 
 ## Install from source
 
@@ -36,6 +36,8 @@ There's no background worker, typing listener, page observer, timer or network r
 ## Development
 
 No build step. `link.js` runs in the page's own world because Reddit's editor (Lexical) can only be reached there, and `bridge.js` passes it the saved links. `test/mock.html` runs `link.js` against real Lexical with Reddit's composer markup: serve the project root over localhost, then open it.
+
+When loaded unpacked, the extension reloads itself when `build.txt` changes. After editing, run `date +%s > build.txt`, then refresh Reddit twice: the first load triggers the reload, the second gets the new code. The first time, click **Reload** once on `chrome://extensions`.
 
 `./package.sh` builds the Chrome Web Store zip into `dist/`.
 

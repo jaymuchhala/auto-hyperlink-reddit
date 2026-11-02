@@ -1,3 +1,5 @@
+# Changes on every edit (dev auto-reload stamp)
+build.txt
 dist/
 .DS_Store
 .claude/

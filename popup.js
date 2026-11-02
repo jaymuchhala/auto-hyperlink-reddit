@@ -1,3 +1,8 @@
+// Lets the worker notice a new build.txt during development (see background.js).
+if (!('update_url' in chrome.runtime.getManifest())) {
+  try { chrome.runtime.sendMessage('ahl:checkBuild').catch(() => {}); } catch (_) { /* extension reloaded */ }
+}
+
 const rows = document.getElementById('rows');
 const status = document.getElementById('status');
 
