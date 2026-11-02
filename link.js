@@ -126,10 +126,11 @@
     if (!links.length || !box) return;
     try {
       if (box.matches(TEXTAREA)) return linkMarkdown(box);
-      const rich = box.querySelector('[data-lexical-editor]');
-      if (box.getAttribute('mode') !== 'markdown' && rich) return linkRichText(rich);
+      // Switching to Markdown leaves mode="richText" and an empty rich editor behind, so go by what's showing.
       const area = box.shadowRoot?.querySelector('shreddit-markdown-composer')?.shadowRoot?.querySelector('textarea');
-      if (area) linkMarkdown(area);
+      if (area?.getClientRects().length) return linkMarkdown(area);
+      const rich = box.querySelector('[data-lexical-editor]');
+      if (rich) linkRichText(rich);
     } catch (err) {
       console.warn('Auto Hyperlink:', err); // never stand in the way of the post
     }
