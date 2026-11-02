@@ -34,18 +34,16 @@ async function save() {
   clearTimeout(saveTimer);
   saveTimer = null;
   const links = [];
-  let unfinished = false;
   for (const row of rows.children) {
     const [, url] = row.querySelectorAll('input');
     const address = cleanUrl(url.value);
     const names = rowNames(row);
     url.setAttribute('aria-invalid', String(Boolean(url.value.trim()) && !address));
     if (names.length && address) links.push({ names, url: address });
-    else if (names.length || url.value.trim()) unfinished = true;
   }
   try {
     await chrome.storage.sync.set({ links });
-    status.textContent = notice || (unfinished ? '' : 'Saved. It applies to open Reddit tabs too.');
+    status.textContent = notice;
     notice = '';
   } catch (err) {
     status.textContent = `Couldn't save: ${err.message}`;
@@ -109,7 +107,7 @@ function addRow(link = { names: [], url: '' }) {
   let settle;
   let merged = false;
   const names = Object.assign(document.createElement('div'), { className: 'names' });
-  const nameInput = Object.assign(document.createElement('input'), { placeholder: 'Name' });
+  const nameInput = Object.assign(document.createElement('input'), { placeholder: 'Word or phrase' });
   nameInput.setAttribute('aria-label', 'Add a name');
   names.append(nameInput);
   const commit = () => {
