@@ -201,9 +201,12 @@ function addRow(link = { names: [], url: '' }) {
 }
 
 // With an empty row already there, + goes to it instead of adding another.
-document.getElementById('add').addEventListener('click', () => {
-  const empty = [...rows.children].find((row) => !rowNames(row).length && !row.querySelectorAll('input')[1].value.trim());
-  (empty ?? addRow()).querySelector('input').focus();
+const emptyRow = () => [...rows.children].find((row) => !rowNames(row).length && !row.querySelectorAll('input')[1].value.trim());
+const add = document.getElementById('add');
+add.addEventListener('click', () => (emptyRow() ?? addRow()).querySelector('input').focus());
+// Already in the empty row: keeps the focus there, so its outline doesn't blink on each click.
+add.addEventListener('mousedown', (e) => {
+  if (document.activeElement === emptyRow()?.querySelector('input')) e.preventDefault();
 });
 
 document.getElementById('backup').addEventListener('click', async () => {
