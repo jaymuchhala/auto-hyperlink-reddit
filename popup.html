@@ -8,6 +8,11 @@
   @media (prefers-color-scheme: dark) { :root { --bg: #1b1b1b; --fg: #eee; --weak: #a5a5a5; --line: #444; --accent: #6db3f8; --danger: #ff6b6b; } }
   body { width: 400px; margin: 0; padding: 14px; background: var(--bg); color: var(--fg); font: 13px/1.4 system-ui, sans-serif; }
   header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .head-actions { display: flex; align-items: center; gap: 12px; }
+  .check { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  input[type="checkbox"] { margin: 0; padding: 0; accent-color: var(--accent); }
+  body.off #rows, body.off #settings { opacity: 0.5; }
+  body:not(.extras) .extra, body.every .first-only { display: none !important; }
   h1 { font-size: 15px; margin: 0; }
   p { margin: 0 0 12px; color: var(--weak); }
   /* 9.5 rows, so the cut-off row shows there's more. The padding keeps focus outlines from being clipped and the scrollbar off the boxes. */
@@ -17,10 +22,14 @@
   #rows::-webkit-scrollbar-thumb { border-radius: 2px; background: var(--line); }
   /* The row being added stays below the list. The scrollbar ends above it. */
   #rows:has(> .row:last-child > .link-view[hidden])::-webkit-scrollbar-track { margin-bottom: 44px; }
-  .row { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 6px; margin-bottom: 6px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr auto; align-items: start; gap: 6px; margin-bottom: 6px; }
   .row:last-child:has(> .link-view[hidden]) { position: sticky; z-index: 1; bottom: 6px; background: var(--bg); box-shadow: 0 0 0 6px var(--bg); }
   input { min-width: 0; padding: 5px 7px; border: 1px solid var(--line); border-radius: 5px; background: transparent; color: inherit; font: inherit; }
   input[aria-invalid="true"] { border-color: #d33; }
+  .exact { min-height: 28px; gap: 3px; color: var(--weak); }
+  .only { grid-column: 1 / -1; }
+  #settings { display: grid; gap: 8px; margin-top: 8px; }
+  #settings label:has(#skip) { display: grid; gap: 4px; }
   .names { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; min-height: 28px; }
   .names input { flex: 1; width: 0; }
   /* A chip removes itself on click. On hover it grows, pushing what's after it along, while its × stretches out. */
@@ -59,14 +68,23 @@
 <body>
   <header>
     <h1>Auto Hyperlink for Reddit</h1>
+    <div class="head-actions">
+    <label class="check" title="Turn linking on or off"><input type="checkbox" id="on" checked> On</label>
     <button class="add" id="add" type="button" title="Add a name" aria-label="Add a name"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect x="0.65" y="0.65" width="32.7" height="32.7" rx="4.35"/><path d="M17 10v14M10 17h14"/></svg></button>
+    </div>
   </header>
   <div id="rows"></div>
   <p id="status" role="status"></p>
+  <div id="settings">
+    <label>Skip subreddits and profiles <input id="skip" placeholder="pics, askreddit, u/username"></label>
+    <label class="check"><input type="checkbox" id="extras"> Extra features</label>
+    <label class="check extra"><input type="checkbox" id="every"> Link every mention</label>
+  </div>
   <ul class="note">
     <li>Runs when you post, comment or edit.</li>
-    <li>First mention linked only.</li>
-    <li>If link is already in post or comment, it won't add to any other words/phrases from the list.</li>
+    <li class="first-only">First mention linked only.</li>
+    <li>Aa: match capitals exactly.</li>
+    <li class="first-only">If link is already in post or comment, it won't add to any other words/phrases from the list.</li>
     <li>New entries apply to open/loaded tabs as well.</li>
     <li class="backup"><button id="backup" type="button">Back up</button> and <button id="restore" type="button">restore</button><input id="file" type="file" accept=".json,application/json" hidden></li>
   </ul>

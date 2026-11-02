@@ -7,6 +7,7 @@
   const COMPOSER = 'shreddit-composer';
   const TEXTAREA = 'textarea[name="text"]'; // old.reddit.com; titles are name="title"
   let links = [];
+  let settings = {};
 
   const key = (name) => name.trim().replace(/\s+/g, ' ').toLowerCase();
   // One address, however it's written: scheme, www, capitals, trailing slash, escaped brackets.
@@ -14,16 +15,27 @@
   // Left alone in both kinds of box: links written out as text, and web addresses with or without a scheme.
   const LINKISH = '!?\\[[^\\]]*\\]\\([^)]*\\)|\\[[^\\]]*\\]\\[[^\\]]*\\]|(?:https?://|www\\.)\\S+|[\\p{L}\\p{N}-]+(?:\\.[\\p{L}\\p{N}-]+)+/\\S*';
 
+  // Read at submit, since Reddit changes pages without reloading. A profile is u/name. Undefined elsewhere.
+  const subreddit = () => {
+    const [, kind, name] = location.pathname.toLowerCase().match(/^\/(r|u|user)\/([^/]+)/) ?? [];
+    return kind && (kind === 'r' ? name : `u/${name}`);
+  };
+  const activeLinks = () => links.filter((l) => !l.only?.length || l.only.includes(subreddit()));
+
   function rules() {
     // A link can have several names. Early versions saved them as one comma-joined string.
     // If a name is ever on two rows, the higher row wins.
-    const urls = new Map(links.flatMap((l) => (l.names ?? l.name.split(',')).map((n) => [key(n), l.url])).reverse());
-    urls.delete('');
-    const sorted = [...urls.keys()].sort((a, b) => b.length - a.length); // longest name wins
-    const names = sorted.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '[^\\S\\n]+')); // a name stays on one line
+    const found = new Map(activeLinks().flatMap((l) => (l.names ?? l.name.split(',')).map((n) => [key(n), { name: n.trim().replace(/\s+/g, ' '), link: l }])).reverse());
+    found.delete('');
+    const sorted = [...found.keys()].sort((a, b) => b.length - a.length); // longest name wins
+    const names = sorted.map((k) => {
+      const { name, link } = found.get(k);
+      const source = (link.exact ? name : k).replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '[^\\S\\n]+'); // a name stays on one line
+      return link.exact ? `(?-i:${source})` : source;
+    });
     return {
       source: `(?<![${WORD}/.@#-])(?:${names.join('|')})(?![${WORD}]|[-./][\\p{L}\\p{N}])`,
-      urls,
+      urls: new Map([...found].map(([k, { link }]) => [k, link.url])),
       done: new Set(), // addresses to leave alone: each is linked once per post
     };
   }
@@ -32,6 +44,7 @@
   // Unicode case rules can match text key() doesn't map to a name (Greek final sigma), which also gives null.
   function claim(name, r) {
     const url = r.urls.get(key(name));
+    if (url && settings.every) return url;
     if (!url || r.done.has(sameUrl(url))) return null;
     r.done.add(sameUrl(url));
     return url;
@@ -127,7 +140,7 @@
   }
 
   function linkBox(box) {
-    if (!links.length || !box) return;
+    if (!box || settings.off || settings.skip?.includes(subreddit()) || !activeLinks().length) return;
     try {
       if (box.matches(TEXTAREA)) return linkMarkdown(box);
       // Switching to Markdown leaves mode="richText" and an empty rich editor behind, so go by what's showing.
@@ -150,6 +163,6 @@
       ?? inPath(path, 'form')?.querySelector(TEXTAREA));
   }, true);
 
-  document.addEventListener('ahl:links', (e) => { links = JSON.parse(e.detail); });
+  document.addEventListener('ahl:links', (e) => { ({ links, settings } = JSON.parse(e.detail)); });
   document.dispatchEvent(new CustomEvent('ahl:ready'));
 })();

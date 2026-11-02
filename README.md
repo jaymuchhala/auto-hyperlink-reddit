@@ -16,7 +16,7 @@ Titles are never changed. Neither are search boxes or any other field, including
 
 ## What it does and doesn't link
 
-- Matching ignores capitals and keeps what you typed: `mute list` stays `mute list`, as a link.
+- Matching ignores capitals and keeps what you typed: `mute list` stays `mute list`, as a link. Tick **Aa** on a row to match its names' capitals exactly.
 - Only the first mention of each link in a post is linked, so posts don't look spammy.
 - A link can have several names, like `Mute List` and `RML`: add each with the same link and they group together. Whichever comes first in the post gets linked, and the others are left alone. Names can contain commas.
 - Each name goes to one link, and the menu won't let you use a name twice. For a second link, like a website as well as the store page, use a more specific name: `Mute List` for the store and `Mute List website` for the site.
@@ -24,6 +24,16 @@ Titles are never changed. Neither are search boxes or any other field, including
 - Longer names win: `Mute List Pro` beats `Mute List`.
 - Text that's already a link, and code, are left alone. If you've linked a name or its address yourself, or written the address out (`https://`, `www.` or neither), it isn't linked again.
 - A name split across formatting (half bold, for example) won't match.
+
+## Settings
+
+- **On**: turns linking on or off.
+- **Skip subreddits and profiles**: nothing is linked on these pages. List subreddits as `pics` or `r/pics`, and profiles as `u/username`.
+- **Extra features**: off by default, and what they set is kept but not used while off.
+  - **Link every mention**: links every mention instead of only the first.
+  - **Only in subreddits or u/profiles**: limits a row to those pages. It's skipped everywhere else.
+
+The subreddit or profile comes from the page's address when you submit.
 
 ## Your data
 
@@ -41,7 +51,7 @@ There's no typing listener, page observer, timer or network request. The code ru
 
 ## Development
 
-No build step. `link.js` runs in the page's own world because Reddit's editor (Lexical) can only be reached there, and `bridge.js` passes it the saved links. `test/mock.html` runs `link.js` against real Lexical with Reddit's composer markup: serve the project root over localhost, then open it.
+No build step. `link.js` runs in the page's own world because Reddit's editor (Lexical) can only be reached there, and `bridge.js` passes it the saved links. `test/mock.html` runs `link.js` against real Lexical with Reddit's composer markup, and `test/menu.html` runs the real menu with `chrome.*` stubbed: serve the project root over localhost, then open them.
 
 When loaded unpacked, the extension reloads itself when `build.txt` changes. After editing, run `date +%s > build.txt`, then refresh Reddit twice: the first load triggers the reload, the second gets the new code. The first time, click **Reload** once on `chrome://extensions`.
 

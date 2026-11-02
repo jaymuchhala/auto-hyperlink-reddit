@@ -24,6 +24,36 @@ function cleanUrl(value) {
   } catch { return null; }
 }
 
+// Subreddits and profiles from a typed list: commas or spaces. A subreddit is kept without r/, a profile as u/name.
+const cleanSubs = (value) => [...new Set(String(value).split(/[\s,]+/).map((s) => s.toLowerCase().replace(/^\/?r\//, '').replace(/^\/?(?:u|user)\//, 'u/')).filter(Boolean))];
+
+const on = document.getElementById('on');
+const skip = document.getElementById('skip');
+const extras = document.getElementById('extras');
+const every = document.getElementById('every');
+
+function readSettings() {
+  return { off: !on.checked, skip: cleanSubs(skip.value), extras: extras.checked, every: every.checked };
+}
+
+function showSettings(settings) {
+  on.checked = !settings.off;
+  skip.value = (settings.skip ?? []).join(', ');
+  extras.checked = Boolean(settings.extras);
+  every.checked = Boolean(settings.every);
+  showMode();
+}
+
+function showMode() {
+  document.body.classList.toggle('off', !on.checked);
+  document.body.classList.toggle('extras', extras.checked);
+  document.body.classList.toggle('every', extras.checked && every.checked);
+}
+
+for (const box of [on, extras, every]) box.addEventListener('change', () => { showMode(); save(); });
+skip.addEventListener('input', saveSoon);
+skip.addEventListener('blur', () => { skip.value = cleanSubs(skip.value).join(', '); });
+
 const cleanName = (value) => value.trim().replace(/\s+/g, ' ');
 
 // A saved link's names. Early versions saved them as one comma-joined string.
@@ -34,6 +64,7 @@ let saveTimer = null;
 let keepStatus = false; // the next save leaves the status message up
 let lastSaved = null; // this window's own last writes, to tell them from another window's
 let lastDrafts = null;
+let lastSettings = null;
 function saveSoon() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(save, 400);
@@ -53,15 +84,19 @@ async function save() {
     url.setAttribute('aria-invalid', String(Boolean(url.value.trim()) && !address));
     // A half-typed change keeps the last good link: the menu can close at any moment.
     if (address && names.length) row.dataset.saved = address;
-    if (names.length && row.dataset.saved) links.push({ names, url: row.dataset.saved });
+    // Left out when unset: all links share one storage item, with a size limit.
+    const options = { ...(row.querySelector('.exact input').checked && { exact: true }), ...(cleanSubs(row.querySelector('.only').value).length && { only: cleanSubs(row.querySelector('.only').value) }) };
+    if (names.length && row.dataset.saved) links.push({ names, url: row.dataset.saved, ...options });
     // A name waiting for a link, or a link for a name, stays on this computer and out of what link.js reads.
-    else if (names.length || url.value.trim()) drafts.push({ names, url: url.value.trim() });
+    else if (names.length || url.value.trim()) drafts.push({ names, url: url.value.trim(), ...options });
   }
+  const settings = readSettings();
   try {
     lastSaved = JSON.stringify(links);
     lastDrafts = JSON.stringify(drafts);
+    lastSettings = JSON.stringify(settings);
     // Both start now: on pagehide, nothing after the first await would run.
-    await Promise.all([chrome.storage.sync.set({ links }), chrome.storage.local.set({ drafts })]);
+    await Promise.all([chrome.storage.sync.set({ links, settings }), chrome.storage.local.set({ drafts })]);
     if (!keepStatus) status.textContent = '';
     keepStatus = false;
     return true;
@@ -200,7 +235,16 @@ function addRow(link = { names: [], url: '' }) {
   };
   urlInput.addEventListener('blur', settle);
   urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') settle(); });
-  row.append(names, urlInput, view);
+  const exact = Object.assign(document.createElement('label'), { className: 'check exact', title: 'Match capitals exactly' });
+  const exactBox = Object.assign(document.createElement('input'), { type: 'checkbox', checked: Boolean(link.exact) });
+  exactBox.setAttribute('aria-label', 'Match capitals exactly');
+  exactBox.addEventListener('change', () => save());
+  exact.append(exactBox, 'Aa');
+  const only = Object.assign(document.createElement('input'), { className: 'only extra', placeholder: 'Only in subreddits or u/profiles (blank: all)', value: (link.only ?? []).join(', ') });
+  only.setAttribute('aria-label', 'Only in these subreddits or profiles');
+  only.addEventListener('input', saveSoon);
+  only.addEventListener('blur', () => { only.value = cleanSubs(only.value).join(', '); });
+  row.append(names, urlInput, view, exact, only);
   rows.append(row);
   addNames(row, namesOf(link));
   settle();
@@ -218,9 +262,9 @@ add.addEventListener('mousedown', (e) => {
 
 document.getElementById('backup').addEventListener('click', async () => {
   const saved = await save();
-  const { links = [] } = await chrome.storage.sync.get('links');
+  const { links = [], settings = {} } = await chrome.storage.sync.get(['links', 'settings']);
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify({ app: 'auto-hyperlink-reddit', links }, null, 2)], { type: 'application/json' }));
+  a.href = URL.createObjectURL(new Blob([JSON.stringify({ app: 'auto-hyperlink-reddit', links, settings }, null, 2)], { type: 'application/json' }));
   a.download = `auto-hyperlink-reddit-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   if (saved) status.textContent = `Backed up ${links.length} ${links.length === 1 ? 'link' : 'links'}.`;
@@ -238,7 +282,7 @@ if (location.hash === '#restore') status.textContent = 'Click Restore to choose 
 // Restoring adds to what's here and never removes anything.
 file.addEventListener('change', async () => {
   try {
-    const { links } = JSON.parse(await file.files[0].text());
+    const { links, settings } = JSON.parse(await file.files[0].text());
     let added = 0;
     let skipped = 0;
     for (const link of links) {
@@ -251,10 +295,11 @@ file.addEventListener('change', async () => {
       if (row) {
         addNames(row, names);
       } else {
-        addRow({ names, url });
+        addRow({ names, url, exact: link.exact, only: link.only });
         added++;
       }
     }
+    skip.value = cleanSubs(`${skip.value},${(settings?.skip ?? []).join()}`).join(', ');
     for (const r of [...rows.children]) if (!rowNames(r).length && !r.querySelectorAll('input')[1].value.trim()) r.remove();
     if (await save()) status.textContent = `Restored. ${added} new ${added === 1 ? 'link' : 'links'} added.${skipped ? ` ${skipped} ${skipped === 1 ? 'name' : 'names'} skipped, already used for another link.` : ''}`;
   } catch {
@@ -278,13 +323,15 @@ function render(links, drafts) {
   // A draft's name may have been given a link in another window since.
   for (const draft of drafts) {
     const { free } = checkNames(namesOf(draft), null);
-    if (free.length || draft.url) addRow({ names: free, url: draft.url });
+    if (free.length || draft.url) addRow({ ...draft, names: free });
   }
   if (!rows.children.length) addRow();
 }
 
 async function load() {
-  const [{ links = [] }, { drafts = [] }] = await Promise.all([chrome.storage.sync.get('links'), chrome.storage.local.get('drafts')]);
+  const [{ links = [], settings = {} }, { drafts = [] }] = await Promise.all([chrome.storage.sync.get(['links', 'settings']), chrome.storage.local.get('drafts')]);
+  showSettings(settings);
+  lastSettings = JSON.stringify(settings);
   render(links, drafts);
 }
 
@@ -294,8 +341,9 @@ load().then(() => [...rows.children].find(unfinished)?.querySelector('input:not(
 
 // Saving writes the whole list, so a window left open has to keep up or it would undo the other's changes.
 chrome.storage.onChanged.addListener((changes, area) => {
-  const change = area === 'sync' ? changes.links : area === 'local' ? changes.drafts : null;
-  if (!change || JSON.stringify(change.newValue ?? []) === (area === 'sync' ? lastSaved : lastDrafts)) return;
+  const differs = (change, mine, empty) => change && JSON.stringify(change.newValue ?? empty) !== mine;
+  const other = area === 'sync' ? differs(changes.links, lastSaved, []) || differs(changes.settings, lastSettings, {}) : area === 'local' && differs(changes.drafts, lastDrafts, []);
+  if (!other) return;
   clearTimeout(saveTimer);
   saveTimer = null;
   load();
