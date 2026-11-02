@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Auto Hyperlink for Reddit (Beta)",
+  "version": "0.1.0",
+  "description": "Turns names you choose into links in your Reddit posts and comments, at the moment you press Post or Comment.",
+  "homepage_url": "https://github.com/jaymuchhala/auto-hyperlink-reddit",
+  "permissions": ["storage"],
+  "icons": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" },
+  "action": { "default_popup": "popup.html", "default_icon": { "16": "icons/16.png", "48": "icons/48.png" } },
+  "options_ui": { "page": "popup.html", "open_in_tab": true },
+  "content_scripts": [
+    {
+      "matches": ["https://www.reddit.com/*", "https://new.reddit.com/*", "https://sh.reddit.com/*", "https://old.reddit.com/*"],
+      "js": ["bridge.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.reddit.com/*", "https://new.reddit.com/*", "https://sh.reddit.com/*", "https://old.reddit.com/*"],
+      "js": ["link.js"],
+      "run_at": "document_idle",
+      "world": "MAIN"
+    }
+  ]
+}

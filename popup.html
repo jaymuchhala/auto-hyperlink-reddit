@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Auto Hyperlink for Reddit</title>
+<style>
+  :root { color-scheme: light dark; --bg: #fff; --fg: #1c1c1c; --weak: #666; --line: #d6d6d6; --accent: #0b6bcb; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #1b1b1b; --fg: #eee; --weak: #a5a5a5; --line: #444; --accent: #6db3f8; } }
+  body { width: 400px; margin: 0; padding: 14px; background: var(--bg); color: var(--fg); font: 13px/1.4 system-ui, sans-serif; }
+  h1 { font-size: 15px; margin: 0 0 2px; }
+  p { margin: 0 0 12px; color: var(--weak); }
+  .row { display: grid; grid-template-columns: 1fr 1.4fr 26px; gap: 6px; margin-bottom: 6px; }
+  input { min-width: 0; padding: 5px 7px; border: 1px solid var(--line); border-radius: 5px; background: transparent; color: inherit; font: inherit; }
+  input[aria-invalid="true"] { border-color: #d33; }
+  button { font: inherit; color: inherit; background: transparent; border: 1px solid var(--line); border-radius: 5px; cursor: pointer; }
+  button.add { margin-top: 2px; padding: 5px 10px; color: var(--accent); border-color: var(--accent); }
+  #status { margin: 8px 0 0; min-height: 18px; }
+</style>
+</head>
+<body>
+  <h1>Auto Hyperlink for Reddit</h1>
+  <p>Each name becomes a link when you press Post or Comment. Only the first mention in each post is linked.</p>
+  <div id="rows"></div>
+  <button class="add" id="add" type="button">Add a name</button>
+  <p id="status" role="status"></p>
+  <script src="popup.js"></script>
+</body>
+</html>
