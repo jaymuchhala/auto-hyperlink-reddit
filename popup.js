@@ -236,9 +236,9 @@ function addRow(link = { names: [], url: '' }) {
   };
   urlInput.addEventListener('blur', settle);
   urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') settle(); });
-  const exact = Object.assign(document.createElement('label'), { className: 'check exact', title: 'Match capitals exactly' });
+  const exact = Object.assign(document.createElement('label'), { className: 'check exact', title: 'Make the word-matching case sensitive' });
   const exactBox = Object.assign(document.createElement('input'), { type: 'checkbox', checked: Boolean(link.exact) });
-  exactBox.setAttribute('aria-label', 'Match capitals exactly');
+  exactBox.setAttribute('aria-label', 'Make the word-matching case sensitive');
   exactBox.addEventListener('change', () => save());
   exact.append(exactBox);
   const only = Object.assign(document.createElement('input'), { className: 'only extra', placeholder: 'Only in subreddits (blank: all)', value: (link.only ?? []).join(', ') });
