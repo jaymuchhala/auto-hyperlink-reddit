@@ -249,6 +249,15 @@ file.addEventListener('change', async () => {
   file.value = '';
 });
 
+// The notes wrap where the longest link's text ends. Only short links would squeeze them, hence the minimum.
+const note = document.querySelector('.note');
+function fitNote() {
+  const box = note.getBoundingClientRect();
+  const ends = [...rows.querySelectorAll('.link-view a')].map((a) => a.getBoundingClientRect().right);
+  note.style.paddingRight = `${box.right - Math.max(box.left + 280, ...ends)}px`;
+}
+new MutationObserver(fitNote).observe(rows, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
+
 function render(links) {
   rows.replaceChildren();
   links.forEach((link) => addRow(link));
